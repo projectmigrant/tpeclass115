@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>臺北集中訓練 專案儀表板</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+<style>
+/* ===== CSS Variables ===== */
+:root {
+  --primary: #E8732A;
+  --primary-light: #FFF3EC;
+  --primary-dark: #C5601E;
+  --success: #22C55E;
+  --warning: #F59E0B;
+  --danger: #EF4444;
+  --neutral: #64748B;
+  --bg: #F8FAFC;
+  --card: #FFFFFF;
+  --text: #1E293B;
+  --text-muted: #64748B;
+  --border: #E2E8F0;
+  --radius: 12px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* ===== Reset & Base ===== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
+h1,h2,h3,h4 { line-height: 1.3; }
+a { color: inherit; text-decoration: none; }
+button { cursor: pointer; border: none; outline: none; font-family: inherit; }
+input, select, textarea { font-family: inherit; }
+table { border-collapse: collapse; width: 100%; }
+
+/* ===== Top Navigation ===== */
+#top-nav {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: var(--shadow);
+}
+.nav-inner {
+  display: flex; align-items: center; gap: 0;
+  padding: 0 20px;
+}
+.nav-brand {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 20px 14px 0;
+  border-right: 1px solid var(--border);
+  margin-right: 10px;
+}
+.nav-brand .logo {
+  width: 32px; height: 32px;
+  background: var(--primary);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-weight: 700; font-size: 14px;
+}
+.nav-brand .brand-text { font-weight: 600; font-size: 13px; color: var(--text); }
+.nav-brand .brand-sub { font-size: 11px; color: var(--text-muted); }
+.nav-tabs { display: flex; gap: 2px; padding: 8px 0; }
+.nav-tab {
+  padding: 8px 20px; border-radius: 8px;
+  font-size: 14px; font-weight: 500;
+  color: var(--text-muted); background: transparent;
+  transition: all 0.15s;
+  border: 1px solid transparent;
+}
+.nav-tab:hover { background: var(--primary-light); color: var(--primary); }
+.nav-tab.active { background: var(--primary); color: white; }
+.nav-right { margin-left: auto; margin-right: 12px; font-size: 12px; color: var(--text-muted); padding: 8px 0; white-space: nowrap; }
+
+/* ===== Views ===== */
+.view { display: none; }
+.view.active { display: block; }
+.container { padding: 20px; }
+
+/* ===== Section Header ===== */
+.section-header { margin-bottom: 20px; }
+.section-header h2 { font-size: 20px; font-weight: 700; color: var(--text); }
+.section-header p { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+
+/* ===== Project Header Banner ===== */
+.project-banner {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+  border-radius: var(--radius); padding: 20px 24px;
+  color: white; margin-bottom: 20px;
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 20px;
+  flex-wrap: wrap;
+}
+.project-banner h1 { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+.project-banner .meta { display: flex; flex-wrap: wrap; gap: 16px; }
+.project-banner .meta-item { font-size: 12px; opacity: 0.9; }
+.project-banner .meta-item span { font-weight: 600; opacity: 1; }
+.project-badge { background: rgba(255,255,255,0.2); border-radius: 8px; padding: 8px 14px; text-align: right; white-space: nowrap; }
+.project-badge .amount { font-size: 22px; font-weight: 700; }
+.project-badge .label { font-size: 11px; opacity: 0.85; }
+
+/* ===== Traffic Light Banner ===== */
+.progress-banner {
+  border-radius: var(--radius); padding: 16px 24px;
+  margin-bottom: 20px;
+  display: flex; align-items: center; gap: 20px;
+  flex-wrap: wrap;
+  transition: background 0.3s;
+}
+.progress-banner.green { background: linear-gradient(90deg, #16A34A 0%, #22C55E 100%); color: white; }
+.progress-banner.yellow { background: linear-gradient(90deg, #D97706 0%, #F59E0B 100%); color: white; }
+.progress-banner.red { background: linear-gradient(90deg, #DC2626 0%, #EF4444 100%); color: white; }
+.pb-ratio { font-size: 36px; font-weight: 800; }
+.pb-label { font-size: 15px; font-weight: 600; }
+.pb-detail { font-size: 12px; opacity: 0.85; margin-top: 2px; }
+.pb-divider { width: 1px; height: 50px; background: rgba(255,255,255,0.3); }
+.pb-item { flex: 1; min-width: 160px; }
+.pb-item-label { font-size: 11px; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.5px; }
+.pb-item-value { font-size: 18px; font-weight: 700; margin-top: 2px; }
+.pb-progress-bar { flex: 2; min-width: 200px; }
+.pb-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.pb-bar-label { font-size: 11px; opacity: 0.85; width: 60px; flex-shrink: 0; }
+.pb-bar-track { flex: 1; height: 8px; background: rgba(255,255,255,0.3); border-radius: 4px; overflow: hidden; }
+.pb-bar-fill { height: 100%; background: white; border-radius: 4px; transition: width 0.5s; }
+.pb-bar-pct { font-size: 11px; width: 36px; text-align: right; }
+
+/* ===== KPI Cards ===== */
+.kpi-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; margin-bottom: 24px; }
+.kpi-card {
+  background: var(--card); border-radius: var(--radius);
+  padding: 20px 12px; box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  text-align: center;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.kpi-card .kpi-label { font-size: 12px; color: var(--text-muted); font-weight: 500; margin-bottom: 8px; }
+.kpi-card .kpi-value { font-size: 28px; font-weight: 800; color: var(--primary); line-height: 1; }
+.kpi-card .kpi-sub { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+.kpi-card .kpi-bar-track { height: 4px; background: var(--border); border-radius: 2px; margin-top: 12px; overflow: hidden; }
+.kpi-card .kpi-bar-fill { height: 100%; background: var(--primary); border-radius: 2px; transition: width 0.5s; }
+
+/* ===== Session Grid ===== */
+.sessions-section { margin-bottom: 24px; }
+.sessions-section h3 { font-size: 16px; font-weight: 700; margin-bottom: 14px; color: var(--text); }
+.session-group { margin-bottom: 20px; }
+.session-group-header {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 10px;
+  padding: 8px 14px;
+  background: var(--primary-light); border-radius: 8px;
+  border-left: 4px solid var(--primary);
+}
+.session-group-header .date { font-size: 18px; font-weight: 700; color: var(--primary); }
+.session-group-header .zone { font-size: 13px; color: var(--text-muted); font-weight: 600; }
+.session-group-header .venue { font-size: 14px; color: var(--text); font-weight: 500; }
+.sessions-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+.session-card {
+  background: var(--card); border-radius: var(--radius);
+  padding: 20px 16px; box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  border-top: 5px solid var(--border);
+  border-left: 5px solid transparent;
+  transition: box-shadow 0.15s;
+  text-align: center;
+}
+.session-card:hover { box-shadow: var(--shadow-md); }
+.session-card.done    { border-top-color: var(--success); }
+.session-card.upcoming{ border-top-color: var(--primary); }
+.session-card.pending { border-top-color: #CBD5E1; }
+
+.sc-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.sc-num { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+.sc-badge { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+.sc-badge.done    { background: #DCFCE7; color: #16A34A; }
+.sc-badge.upcoming{ background: #FFF3EC; color: var(--primary); }
+.sc-badge.pending { background: #F1F5F9; color: var(--neutral); }
+
+.sc-ampm { display: block; font-size: 13px; font-weight: 700; padding: 4px 12px; border-radius: 6px; margin: 0 auto 10px; width: fit-content; }
+.sc-ampm.am { background: #BFDBFE; color: #1D4ED8; }
+.sc-ampm.pm { background: #FDE68A; color: #92400E; }
+
+.sc-topic  { font-size: 22px; font-weight: 900; color: var(--text); margin-bottom: 6px; line-height: 1.2; }
+.sc-teacher{ font-size: 14px; color: var(--text-muted); margin-bottom: 16px; }
+
+.sc-attendance { display: flex; gap: 20px; margin-bottom: 10px; justify-content: center; }
+.sc-att-item { text-align: center; min-width: 52px; }
+.sc-att-item .val { font-size: 42px; font-weight: 900; color: var(--text); line-height: 1; }
+.sc-att-item .lbl { font-size: 13px; color: var(--text-muted); margin-top: 4px; font-weight: 600; }
+
+/* Topic colors — vivid */
+.session-card.topic-dim  { background: #BFDBFE; border-left-color: #2563EB; }
+.session-card.topic-diet { background: #A7F3D0; border-left-color: #059669; }
+.session-card.topic-chew { background: #FCD34D; border-left-color: #D97706; }
+.session-card.topic-nurs { background: #DDD6FE; border-left-color: #7C3AED; }
+.session-card.topic-adv  { background: #FCA5A5; border-left-color: #DC2626; }
+
+.sc-min { font-size: 12px; margin-top: 6px; font-weight: 500; }
+.sc-min.ok   { color: #15803D; }
+.sc-min.fail { color: var(--danger); }
+.sc-min.na   { color: var(--text-muted); }
+
+/* ===== Timeline ===== */
+.timeline-section { margin-bottom: 24px; }
+.timeline-section h3 { font-size: 16px; font-weight: 700; margin-bottom: 14px; }
+.timeline {
+  background: var(--card); border-radius: var(--radius);
+  padding: 24px; box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  overflow-x: auto;
+}
+.tl-track { position: relative; padding: 40px 0 20px; min-width: 600px; }
+.tl-line { position: absolute; top: 20px; left: 0; right: 0; height: 3px; background: var(--border); }
+.tl-progress { position: absolute; top: 20px; left: 0; height: 3px; background: var(--primary); transition: width 0.5s; }
+.tl-items { display: flex; justify-content: space-between; position: relative; }
+.tl-item { display: flex; flex-direction: column; align-items: center; text-align: center; flex: 1; }
+.tl-dot {
+  width: 16px; height: 16px; border-radius: 50%;
+  border: 3px solid var(--border);
+  background: var(--card);
+  margin-bottom: 10px; position: relative;
+  transition: all 0.2s;
+}
+.tl-dot.done { background: var(--success); border-color: var(--success); }
+.tl-dot.current { background: var(--primary); border-color: var(--primary); box-shadow: 0 0 0 4px rgba(232,115,42,0.2); }
+.tl-dot.upcoming { background: var(--card); border-color: var(--primary); }
+.tl-date { font-size: 11px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+.tl-zone { font-size: 10px; color: var(--text-muted); }
+.tl-sessions { font-size: 10px; color: var(--primary); font-weight: 600; margin-top: 2px; }
+
+/* ===== Cards & Grids ===== */
+.cards-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.stat-card {
+  background: var(--card); border-radius: var(--radius);
+  padding: 20px; box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+.stat-card .label { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+.stat-card .value { font-size: 28px; font-weight: 800; color: var(--primary); }
+.stat-card .sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+/* ===== Charts ===== */
+.charts-row { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px; }
+.charts-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+@media (max-width: 900px) { .charts-row { grid-template-columns: 1fr; } .charts-row-3 { grid-template-columns: 1fr; } }
+.chart-card {
+  background: var(--card); border-radius: var(--radius);
+  padding: 20px; box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+.chart-card h4 { font-size: 14px; font-weight: 600; margin-bottom: 16px; color: var(--text); }
+.chart-wrap { position: relative; }
+
+/* ===== Tables ===== */
+.table-card {
+  background: var(--card); border-radius: var(--radius);
+  padding: 20px; box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  margin-bottom: 20px;
+  overflow-x: auto;
+}
+.table-card h4 { font-size: 14px; font-weight: 600; margin-bottom: 14px; color: var(--text); }
+.data-table { font-size: 13px; }
+.data-table th {
+  padding: 10px 12px; text-align: left;
+  background: #F8FAFC; font-weight: 600;
+  color: var(--text-muted); font-size: 11px;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.data-table td {
+  padding: 10px 12px; border-bottom: 1px solid var(--border);
+  color: var(--text);
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr.group-header td {
+  background: var(--primary-light); font-weight: 700;
+  color: var(--primary); font-size: 12px;
+  text-transform: uppercase;
+}
+.data-table tr.total-row td { font-weight: 700; background: #F1F5F9; }
+.data-table tr.over-budget td { background: #FEF2F2; }
+.data-table tr.under-min td { background: #FEF2F2; }
+.data-table tr.ok-min td { background: #F0FDF4; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+.badge-success { background: #DCFCE7; color: #16A34A; }
+.badge-warning { background: #FEF3C7; color: #92400E; }
+.badge-danger { background: #FEF2F2; color: #DC2626; }
+.badge-neutral { background: #F1F5F9; color: var(--neutral); }
+.badge-primary { background: var(--primary-light); color: var(--primary); }
+
+/* ===== Admin / 後台 ===== */
+.admin-subtabs { display: flex; gap: 6px; margin-bottom: 20px; }
+.admin-subtab {
+  padding: 8px 18px; border-radius: 8px;
+  font-size: 13px; font-weight: 500;
+  color: var(--text-muted); background: var(--card);
+  border: 1px solid var(--border);
+  transition: all 0.15s;
+}
+.admin-subtab:hover { border-color: var(--primary); color: var(--primary); }
+.admin-subtab.active { background: var(--primary); color: white; border-color: var(--primary); }
+.admin-panel { display: none; }
+.admin-panel.active { display: block; }
+
+.admin-table { font-size: 13px; }
+.admin-table th {
+  padding: 10px 8px; text-align: left;
+  background: #F8FAFC; font-weight: 600;
+  color: var(--text-muted); font-size: 11px;
+  border-bottom: 2px solid var(--border);
+  white-space: nowrap;
+}
+.admin-table td { padding: 6px 8px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.admin-table tr:last-child td { border-bottom: none; }
+.admin-table input[type="number"],
+.admin-table input[type="text"],
+.admin-table select,
+.admin-table textarea {
+  width: 100%; padding: 6px 8px; font-size: 12px;
+  border: 1px solid var(--border); border-radius: 6px;
+  background: white; color: var(--text);
+  transition: border-color 0.15s;
+}
+.admin-table input:focus,
+.admin-table select:focus,
+.admin-table textarea:focus {
+  border-color: var(--primary); outline: none;
+  box-shadow: 0 0 0 2px rgba(232,115,42,0.15);
+}
+.admin-table textarea { resize: vertical; min-height: 36px; }
+
+.btn { padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; transition: all 0.15s; }
+.btn-primary { background: var(--primary); color: white; }
+.btn-primary:hover { background: var(--primary-dark); }
+.btn-success { background: var(--success); color: white; }
+.btn-success:hover { background: #16A34A; }
+.btn-danger { background: var(--danger); color: white; font-size: 11px; padding: 4px 10px; }
+.btn-danger:hover { background: #DC2626; }
+.btn-outline { background: white; color: var(--text); border: 1px solid var(--border); }
+.btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+.btn-sm { padding: 5px 12px; font-size: 12px; }
+
+.admin-toolbar { display: flex; gap: 10px; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+.admin-toolbar h4 { font-size: 15px; font-weight: 700; margin-right: auto; }
+.save-notice { font-size: 12px; color: var(--success); display: none; }
+.save-notice.show { display: inline; }
+
+/* ===== Utilities ===== */
+.text-right { text-align: right; }
+.text-center { text-align: center; }
+.text-success { color: var(--success); }
+.text-danger { color: var(--danger); }
+.text-muted { color: var(--text-muted); }
+.text-primary { color: var(--primary); }
+.font-bold { font-weight: 700; }
+.mb-4 { margin-bottom: 16px; }
+.mb-6 { margin-bottom: 24px; }
+.flex { display: flex; }
+.items-center { align-items: center; }
+.gap-2 { gap: 8px; }
+.gap-4 { gap: 16px; }
+.ml-auto { margin-left: auto; }
+
+/* ===== Responsive — 平板 ===== */
+@media (max-width: 900px) {
+  .charts-row   { grid-template-columns: 1fr; }
+  .charts-row-3 { grid-template-columns: 1fr; }
+  .pl-3col      { grid-template-columns: 1fr; }
+  .kpi-grid     { grid-template-columns: repeat(4, 1fr); }
+}
+
+/* ===== Responsive — 手機 ===== */
+@media (max-width: 640px) {
+  body { font-size: 13px; }
+
+  /* Nav */
+  .nav-inner    { padding: 0 10px; flex-wrap: wrap; height: auto; }
+  .nav-brand    { padding: 10px 10px 10px 0; }
+  .nav-brand .brand-text { display: none; }
+  .nav-tabs     { overflow-x: auto; padding: 6px 0; gap: 2px; flex-wrap: nowrap; width: 100%; }
+  .nav-tab      { padding: 6px 10px; font-size: 12px; white-space: nowrap; flex-shrink: 0; }
+  .nav-right    { display: none; }
+
+  /* Container */
+  .container    { padding: 12px 10px; }
+
+  /* Project banner */
+  .project-banner { flex-direction: column; gap: 10px; padding: 14px 16px; }
+  .project-badge  { text-align: left; }
+  .project-banner .meta { gap: 10px; }
+  .project-banner h1 { font-size: 15px; }
+
+  /* Progress banner */
+  .progress-banner { padding: 12px 14px; gap: 12px; }
+  .pb-ratio { font-size: 28px; }
+  .pb-item  { min-width: 120px; }
+  .pb-item-value { font-size: 15px; }
+
+  /* KPI grid */
+  .kpi-grid   { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .kpi-card .kpi-value { font-size: 24px; }
+
+  /* Session group header */
+  .session-group-header { flex-direction: column; align-items: flex-start; gap: 4px; padding: 8px 12px; }
+  .session-group-header .venue { white-space: normal; font-size: 11px; }
+
+  /* Session pair → 1 column */
+  .sessions-pair { grid-template-columns: 1fr; gap: 12px; }
+
+  /* Session card */
+  .session-card { padding: 16px 14px; }
+  .sc-topic  { font-size: 19px; }
+  .sc-att-item .val { font-size: 34px; }
+  .sc-att-item .lbl { font-size: 12px; }
+  .sc-att-item  { min-width: 44px; }
+  .sc-attendance { gap: 14px; }
+
+  /* Charts */
+  .chart-card { padding: 14px; }
+
+  /* Tables */
+  table { font-size: 11px; }
+  th, td { padding: 6px 8px; }
+
+  /* P&L */
+  .pl-3col { grid-template-columns: 1fr; }
+  .pl-col  { padding: 14px; }
+}
+
+/* ===== PL 3-Column Layout ===== */
+.pl-3col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 1000px) { .pl-3col { grid-template-columns: 1fr; } }
+.pl-col { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); padding: 20px; }
+.pl-col-header { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 13px; color: var(--text); border-left: 3px solid var(--primary); padding-left: 10px; margin-bottom: 16px; line-height: 1.4; }
+.pl-section-label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; margin: 12px 0 4px; }
+.pl-line { display: flex; justify-content: space-between; align-items: baseline; padding: 5px 0; border-bottom: 1px solid #F1F5F9; font-size: 13px; gap: 8px; }
+.pl-line .pl-lbl { color: var(--text); flex: 1; }
+.pl-line .pl-lbl small { color: var(--text-muted); font-size: 11px; display: block; line-height: 1.3; margin-top: 1px; }
+.pl-line .pl-amt { font-weight: 600; white-space: nowrap; color: var(--text); }
+.pl-line .pl-amt.warn { color: var(--warning); }
+.pl-contract { display: flex; justify-content: space-between; font-weight: 700; font-size: 15px; padding: 12px 0 0; margin-top: 8px; border-top: 2px solid var(--border); color: #2563EB; }
+.pl-warning-note { font-size: 11px; color: var(--warning); margin-top: 8px; }
+.pl-subtotal { display: flex; justify-content: space-between; font-weight: 700; font-size: 14px; padding: 10px 0; border-top: 2px solid var(--border); margin-top: 6px; color: var(--primary); }
+.pl-progress-section { margin: 14px 0; }
+.pl-progress-meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-muted); margin-bottom: 5px; }
+.pl-progress-track { height: 8px; background: #E2E8F0; border-radius: 4px; overflow: hidden; }
+.pl-progress-fill { height: 100%; border-radius: 4px; background: var(--danger); }
+.pl-pl-box { text-align: center; padding: 14px 0 6px; border-top: 1px solid var(--border); margin-top: 4px; }
+.pl-pl-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+.pl-pl-value { font-size: 28px; font-weight: 800; line-height: 1.1; }
+.pl-est-total { display: flex; justify-content: space-between; font-weight: 700; font-size: 14px; padding: 10px 0; border-top: 2px solid var(--border); margin-top: 6px; color: var(--primary); }
+.pl-est-surplus { display: flex; justify-content: space-between; font-weight: 700; font-size: 14px; padding: 6px 0 0; }
+.pl-analysis { background: var(--primary-light); border-radius: 8px; padding: 12px; margin-top: 14px; }
+.pl-analysis-title { font-size: 12px; font-weight: 700; color: var(--primary); margin-bottom: 8px; }
+.pl-analysis-item { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; line-height: 1.5; }
+.pl-analysis-item strong { color: var(--primary); }
+</style>
+</head>
+<body>
+
+<!-- ===== TOP NAVIGATION ===== -->
+<nav id="top-nav">
+  <div class="nav-inner">
+    <div class="nav-brand">
+      <div class="logo">台北</div>
+      <div>
+        <div class="brand-text">集中訓練管理系統</div>
+        <div class="brand-sub">T115010 · 115年</div>
+      </div>
+    </div>
+    <div class="nav-right" id="nav-clock">最後更新：—</div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" onclick="switchView('dashboard',this)">📊 前台</button>
+      <button class="nav-tab" onclick="switchView('pl',this)">💰 損益</button>
+      <button class="nav-tab" onclick="switchView('stats',this)">📈 報名統計</button>
+      <button class="nav-tab" onclick="switchView('admin',this)">⚙️ 後台</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ===== VIEW: 前台 ===== -->
+<div id="view-dashboard" class="view active">
+  <div class="container">
+    <!-- Project Banner -->
+    <div class="project-banner">
+      <div>
+        <h1>115年臺北市聘用外籍看護工雇主安心計畫－集中訓練</h1>
+        <div class="meta">
+          <div class="meta-item">案號 <span>T115010</span></div>
+          <div class="meta-item">執行機構 <span>歲悅股份有限公司附設臺北市私立歲悅居家長照機構</span></div>
+          <div class="meta-item">執行期間 <span>2026/4/9 ~ 2026/10/15</span></div>
+          <div class="meta-item">課程截止 <span>2026/9/15</span></div>
+        </div>
+      </div>
+      <div class="project-badge">
+        <div class="amount">$1,250,000</div>
+        <div class="label">總預算（新台幣）</div>
+      </div>
+    </div>
+
+    <!-- Traffic Light Progress Banner -->
+    <div id="progress-banner" class="progress-banner">
+      <div>
+        <div class="pb-ratio" id="pb-ratio-text">--</div>
+        <div class="pb-label" id="pb-label-text">計算中...</div>
+        <div class="pb-detail" id="pb-detail-text"></div>
+      </div>
+      <div class="pb-divider"></div>
+      <div class="pb-progress-bar">
+        <div class="pb-bar-row">
+          <div class="pb-bar-label">時間進度</div>
+          <div class="pb-bar-track"><div class="pb-bar-fill" id="pb-time-fill" style="width:0%"></div></div>
+          <div class="pb-bar-pct" id="pb-time-pct">0%</div>
+        </div>
+        <div class="pb-bar-row">
+          <div class="pb-bar-label">場次進度</div>
+          <div class="pb-bar-track"><div class="pb-bar-fill" id="pb-session-fill" style="width:0%"></div></div>
+          <div class="pb-bar-pct" id="pb-session-pct">0%</div>
+        </div>
+      </div>
+      <div class="pb-divider"></div>
+      <div class="pb-item">
+        <div class="pb-item-label">距課程截止</div>
+        <div class="pb-item-value" id="pb-days-deadline">-- 天</div>
+      </div>
+      <div class="pb-item">
+        <div class="pb-item-label">合約剩餘</div>
+        <div class="pb-item-value" id="pb-days-contract">-- 天</div>
+      </div>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">已完成場次</div>
+        <div class="kpi-value" id="kpi-done">--</div>
+        <div class="kpi-sub">目標 12 場</div>
+        <div class="kpi-bar-track"><div class="kpi-bar-fill" id="kpi-done-bar" style="width:0%"></div></div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">總出席人次</div>
+        <div class="kpi-value" id="kpi-total-att">--</div>
+        <div class="kpi-sub">已完成場次累計</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">移工出席人次</div>
+        <div class="kpi-value" id="kpi-mig-att">--</div>
+        <div class="kpi-sub">已完成場次累計</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">距下場課程</div>
+        <div class="kpi-value" id="kpi-next-days">--</div>
+        <div class="kpi-sub" id="kpi-next-label">計算中...</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">本案總標價</div>
+        <div class="kpi-value" id="kpi-contract">$1,250,000</div>
+        <div class="kpi-sub">含稅（新台幣）</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">預估盈餘</div>
+        <div class="kpi-value" id="kpi-surplus">--</div>
+        <div class="kpi-sub" id="kpi-surplus-sub">依完工成本估算</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">場次達標率</div>
+        <div class="kpi-value" id="kpi-completion-rate">--</div>
+        <div class="kpi-sub" id="kpi-completion-sub">已完成 / 共 12 場</div>
+        <div class="kpi-bar-track"><div class="kpi-bar-fill" id="kpi-completion-bar" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <!-- Sessions Grid -->
+    <div class="sessions-section">
+      <h3>場次狀態總覽</h3>
+      <div id="sessions-grid"></div>
+    </div>
+
+    <!-- Timeline -->
+    <div class="timeline-section">
+      <h3>課程日期里程碑</h3>
+      <div class="timeline">
+        <div class="tl-track">
+          <div class="tl-line"></div>
+          <div class="tl-progress" id="tl-progress" style="width:0%"></div>
+          <div class="tl-items" id="tl-items"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== VIEW: 損益 ===== -->
+<div id="view-pl" class="view">
+  <div class="container">
+    <div class="section-header">
+      <h2>損益分析</h2>
+      <p>預算 vs 實際支出 vs 完工成本預估</p>
+    </div>
+    <div class="pl-3col" id="pl-3col"></div>
+  </div>
+</div>
+
+<!-- ===== VIEW: 報名統計 ===== -->
+<div id="view-stats" class="view">
+  <div class="container">
+    <div class="section-header">
+      <h2>報名出席統計</h2>
+      <p>各場次移工與雇主出席人數分析</p>
+    </div>
+
+    <div class="cards-row" id="stats-summary-cards"></div>
+
+    <div class="charts-row">
+      <div class="chart-card">
+        <h4>各場次出席人數（移工 vs 雇主）</h4>
+        <div class="chart-wrap" style="height:300px"><canvas id="chart-attendance-bar"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h4>移工/雇主比例</h4>
+        <div class="chart-wrap" style="height:300px"><canvas id="chart-ratio-donut"></canvas></div>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <h4>各場次達標明細</h4>
+      <table class="data-table" id="stats-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>日期</th>
+            <th>時段</th>
+            <th>主題</th>
+            <th class="text-right">移工</th>
+            <th class="text-right">雇主</th>
+            <th class="text-right">總計</th>
+            <th>最低人數</th>
+            <th>達標</th>
+            <th>狀態</th>
+          </tr>
+        </thead>
+        <tbody id="stats-table-body"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ===== VIEW: 後台 ===== -->
+<div id="view-admin" class="view">
+  <div class="container">
+    <div class="section-header">
+      <h2>後台管理</h2>
+      <p>場次資料與費用管理</p>
+    </div>
+
+    <div class="admin-subtabs">
+      <button class="admin-subtab active" onclick="switchAdminTab('sessions-tab')">📅 場次資料</button>
+      <button class="admin-subtab" onclick="switchAdminTab('expenses-tab')">💳 費用管理</button>
+    </div>
+
+    <!-- Session Admin -->
+    <div id="sessions-tab" class="admin-panel active">
+      <div class="table-card">
+        <div class="admin-toolbar">
+          <h4>場次資料管理</h4>
+          <button class="btn btn-primary btn-sm" onclick="saveSessionData()">💾 儲存場次資料</button>
+          <span class="save-notice" id="session-save-notice">✓ 已儲存</span>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="admin-table" id="session-admin-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>日期</th>
+                <th>區域</th>
+                <th>地點</th>
+                <th>時段</th>
+                <th>講師</th>
+                <th>主題</th>
+                <th>狀態</th>
+                <th>移工人數</th>
+                <th>雇主人數</th>
+                <th>備註</th>
+              </tr>
+            </thead>
+            <tbody id="session-admin-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Expense Admin -->
+    <div id="expenses-tab" class="admin-panel">
+      <div class="table-card">
+        <div class="admin-toolbar">
+          <h4>費用管理</h4>
+          <button class="btn btn-outline btn-sm" onclick="addExpenseRow()">＋ 新增項目</button>
+          <button class="btn btn-primary btn-sm" onclick="saveExpenseData()">💾 儲存費用資料</button>
+          <button class="btn btn-outline btn-sm" onclick="exportJSON()">⬇ 匯出 JSON</button>
+          <span class="save-notice" id="expense-save-notice">✓ 已儲存</span>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="admin-table" id="expense-admin-table">
+            <thead>
+              <tr>
+                <th>類別</th>
+                <th>項目名稱</th>
+                <th>預算金額</th>
+                <th>已報支金額</th>
+                <th>備註</th>
+                <th>刪除</th>
+              </tr>
+            </thead>
+            <tbody id="expense-admin-body"></tbody>
+            <tfoot>
+              <tr style="background:#F1F5F9; font-weight:700">
+                <td colspan="2">合計</td>
+                <td id="expense-total-budget" class="text-right"></td>
+                <td id="expense-total-actual" class="text-right"></td>
+                <td colspan="2"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===================================================================
+// DATA MODEL
+// ===================================================================
+const STORAGE_KEY = 'tpe_central_data';
+const TODAY = new Date('2026-07-30');
+
+const DEFAULT_SESSIONS = [
+  // Group 1: 7/5 北區
+  { id:1, date:'2026-07-05', zone:'北區', venue:'臺北市中山老人住宅暨服務中心', venueAddr:'中山區新生北路二段101巷2號', ampm:'AM', teacher:'林乃玉', topic:'失智症日常生活安排與問題行為處理', status:'done', migrants:17, employers:11, note:'', minMig:10, minTotal:20 },
+  { id:2, date:'2026-07-05', zone:'北區', venue:'臺北市中山老人住宅暨服務中心', venueAddr:'中山區新生北路二段101巷2號', ampm:'PM', teacher:'劉婷妮', topic:'高齡飲食備餐技巧', status:'done', migrants:17, employers:11, note:'', minMig:10, minTotal:20 },
+  // Group 2: 7/26 北區
+  { id:3, date:'2026-07-26', zone:'北區', venue:'臺北市中山老人住宅暨服務中心', venueAddr:'中山區新生北路二段101巷2號', ampm:'AM', teacher:'王麗雅', topic:'高齡咀嚼吞嚥障礙及口腔照護', status:'done', migrants:15, employers:10, note:'', minMig:10, minTotal:20 },
+  { id:4, date:'2026-07-26', zone:'北區', venue:'臺北市中山老人住宅暨服務中心', venueAddr:'中山區新生北路二段101巷2號', ampm:'PM', teacher:'陳金莉', topic:'居家護理特殊問題指導及就醫安全', status:'done', migrants:15, employers:10, note:'', minMig:10, minTotal:20 },
+  // Group 3: 8/2 西區
+  { id:5, date:'2026-08-02', zone:'西區', venue:'萬華社區長照機構', venueAddr:'萬華區康定路43號2樓', ampm:'AM', teacher:'劉建良', topic:'失智症日常生活安排與問題行為處理', status:'upcoming', migrants:0, employers:0, note:'', minMig:10, minTotal:20 },
+  { id:6, date:'2026-08-02', zone:'西區', venue:'萬華社區長照機構', venueAddr:'萬華區康定路43號2樓', ampm:'PM', teacher:'劉婷妮', topic:'高齡飲食備餐技巧', status:'upcoming', migrants:0, employers:0, note:'', minMig:10, minTotal:20 },
+  // Group 4: 8/16 西區
+  { id:7, date:'2026-08-16', zone:'西區', venue:'萬華社區長照機構', venueAddr:'萬華區康定路43號2樓', ampm:'AM', teacher:'陳金莉', topic:'居家護理特殊問題指導及就醫安全', status:'pending', migrants:0, employers:0, note:'', minMig:10, minTotal:20 },
+  { id:8, date:'2026-08-16', zone:'西區', venue:'萬華社區長照機構', venueAddr:'萬華區康定路43號2樓', ampm:'PM', teacher:'王麗雅', topic:'高齡咀嚼吞嚥障礙及口腔照護', status:'pending', migrants:0, employers:0, note:'', minMig:10, minTotal:20 },
+  // Group 5: 9/6 南區
+  { id:9, date:'2026-09-06', zone:'南區', venue:'紅心字會信義長照', venueAddr:'信義區虎林街74巷2號', ampm:'AM', teacher:'劉建良', topic:'失智症日常生活安排與問題行為處理', status:'pending', migrants:0, employers:0, note:'', minMig:10, minTotal:20 },
+  { id:10, date:'2026-09-06', zone:'南區', venue:'紅心字會信義長照', venueAddr:'信義區虎林街74巷2號', ampm:'PM', teacher:'劉婷妮', topic:'高齡飲食備餐技巧', status:'pending', migrants:0, employers:0, note:'', minMig:10, minTotal:20 },
+  // Group 6: 9/12 南區
+  { id:11, date:'2026-09-12', zone:'南區', venue:'紅心字會信義長照', venueAddr:'信義區虎林街74巷2號', ampm:'AM', teacher:'陳金莉', topic:'居家護理特殊問題指導及就醫安全', status:'pending', migrants:0, employers:0, note:'', minMig:10, minTotal:20 },
+  { id:12, date:'2026-09-12', zone:'南區', venue:'紅心字會信義長照', venueAddr:'信義區虎林街74巷2號', ampm:'PM', teacher:'王曉萍', topic:'外國人從事家庭看護工作補充訓練－口腔內(懸壅垂之前)及人工氣道管內分泌物之清潔、抽吸與移除及氧氣使用', status:'pending', migrants:0, employers:0, note:'工作年資3年以上', minMig:4, minTotal:7 },
+];
+
+// 費用資料更新來源：
+//   1. Google Drive「115集中訓練費用支出明細表」(2026/7/29)
+//   2. ❰臺北集中訓練❱零用金收支明細表 (2026/7/30)
+//   3. 《轉轉月結》收支明細表－集中訓練相關名目 (2026/7/30)
+// 已確認總支出：$148,361（含費用明細表$138,569 + 零用金/轉轉新增$9,792）
+// ⚠️ 待確認：翻譯費、9月場地費、人員費（勞報單）
+const DEFAULT_EXPENSES = [
+  // 人事費用（待確認：勞報單尚未入帳）
+  { id:'e1',  category:'人事費用', item:'工作人員費',     budget:27360,  actual:0,      note:'190元/節×4節×3人×12場 ⚠️待確認勞報單' },
+  { id:'e2',  category:'人事費用', item:'講師鐘點費',     budget:96000,  actual:0,      note:'2,000元/節×4節×12場 ⚠️待確認勞報單' },
+  { id:'e3',  category:'人事費用', item:'通譯人員鐘點費', budget:48000,  actual:0,      note:'500元/節×2名×4節×12場 ⚠️待確認勞報單' },
+  { id:'e4',  category:'人事費用', item:'專業照顧人力',   budget:40320,  actual:0,      note:'280元/節×4節×3人×12場 ⚠️待確認勞報單' },
+  // 業務費用
+  { id:'e5',  category:'業務費用', item:'講義印製費',     budget:84000,  actual:3641,   note:'lala印製$176(7/26$88+8/2$88) + 轉轉$3,465(7/1失智症+高齡備餐×30份$1,808；7/21居家護理+咀嚼吞嚥×30份$1,657)' },
+  { id:'e6',  category:'業務費用', item:'講義翻譯費',     budget:96750,  actual:0,      note:'⚠️待確認（翻譯費未見於轉轉月結，需另確認）' },
+  { id:'e7',  category:'業務費用', item:'教材費',         budget:120000, actual:69498,  note:'護理包+有獎徵答獎品+移位腰帶$66,983 + 7/5器具袋子$1,802 + 7/26紙碗湯匙+彩色筆$234 + 5/12贈品樣品$479（含護理包、移位腰帶80條×$1,000）' },
+  { id:'e8',  category:'業務費用', item:'教具租用費',     budget:60000,  actual:0,      note:'⚠️待確認' },
+  { id:'e9',  category:'業務費用', item:'有獎徵答獎品',   budget:15000,  actual:0,      note:'已計入教材費$66,983中' },
+  { id:'e10', category:'業務費用', item:'餐費',           budget:50400,  actual:27793,  note:'7/5: 飲料$755+稀飯$459+便當$4,225+食材$1,212+下午茶$2,841=$9,492；7/26: 稀飯$495+飲料$839+下午茶$2,100+午餐$14,867=$18,301' },
+  { id:'e11', category:'業務費用', item:'場地費',         budget:216000, actual:9600,   note:'7月(7/5&7/26)中山老人住宅$9,600；8月萬華社區長照$0（公司自有日照機構）；9月紅心字會⚠️待確認' },
+  { id:'e12', category:'業務費用', item:'場地佈置費',     budget:24000,  actual:0,      note:'⚠️待確認' },
+  { id:'e13', category:'業務費用', item:'郵電費',         budget:10000,  actual:2114,   note:'郵寄費$1,560(7/5宣傳單$1,532+場地收據$28) + 捷運$25(7/26) + 快遞費$529(轉轉印刷品運送：5/29$211+6/1$128+7/2$102+7/21$88)' },
+  { id:'e14', category:'業務費用', item:'撰稿費',         budget:20000,  actual:0,      note:'⚠️待確認' },
+  { id:'e15', category:'業務費用', item:'設計費',         budget:8000,   actual:0,      note:'⚠️待確認' },
+  { id:'e16', category:'業務費用', item:'印製費',         budget:12000,  actual:4419,   note:'轉轉月結集中訓練相關：4/21契約書$1,652 + 5/26宣傳海報$613 + 5/27傳單+海報$1,377 + 5/29海報$525 + 6/18愛滋+反詐騙海報$252' },
+  { id:'e17', category:'業務費用', item:'保險費',         budget:10000,  actual:6636,   note:'公共意外責任險 $6,636（公司支付 2026/6/21）' },
+  { id:'e18', category:'業務費用', item:'租車費',         budget:96000,  actual:21300,  note:'7/5: 交通車去$5,000+回$5,500=$10,500；7/26: 交通車去$5,000+回$5,000+輪椅計程車$800=$10,800（月結）' },
+  { id:'e19', category:'業務費用', item:'Shorts短影音',   budget:80000,  actual:0,      note:'9/15前課程完成後製作（中文4部+印尼語4部）' },
+  // 行政項目
+  { id:'e20', category:'行政項目', item:'雜費',   budget:45000,  actual:3360,   note:'7/5場佈交通$905+場復$355=$1,260；7/26場佈交通$800+場復$400=$1,200；5/5場勘交通$100；7/21輪椅搬運計程車$800' },
+  { id:'e21', category:'行政項目', item:'管理費', budget:91170,  actual:0,      note:'結案後計算' },
+];
+
+// ===================================================================
+// STORAGE
+// ===================================================================
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) {
+      const d = JSON.parse(raw);
+      return {
+        sessions: d.sessions || JSON.parse(JSON.stringify(DEFAULT_SESSIONS)),
+        expenses: d.expenses || JSON.parse(JSON.stringify(DEFAULT_EXPENSES)),
+      };
+    }
+  } catch(e) { console.error('Load error', e); }
+  return {
+    sessions: JSON.parse(JSON.stringify(DEFAULT_SESSIONS)),
+    expenses: JSON.parse(JSON.stringify(DEFAULT_EXPENSES)),
+  };
+}
+
+function saveData(data) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+let appData = loadData();
+
+// ===================================================================
+// UTILITIES
+// ===================================================================
+function fmt(n) { return n.toLocaleString('zh-TW'); }
+function fmtDate(ds) {
+  const d = new Date(ds + 'T00:00:00');
+  return `${d.getMonth()+1}/${d.getDate()}`;
+}
+function fmtDateFull(ds) {
+  const d = new Date(ds + 'T00:00:00');
+  const days = ['日','一','二','三','四','五','六'];
+  return `${d.getMonth()+1}/${d.getDate()}(${days[d.getDay()]})`;
+}
+function daysDiff(a, b) {
+  return Math.round((b - a) / 86400000);
+}
+function clamp(v, min, max) { return Math.min(Math.max(v, min), max); }
+
+// ===================================================================
+// VIEW SWITCHING
+// ===================================================================
+let currentView = 'dashboard';
+let chartsInitialized = {};
+
+function switchView(view, el) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('view-' + view).classList.add('active');
+  if (el) el.classList.add('active');
+  currentView = view;
+  if (view === 'dashboard') renderDashboard();
+  if (view === 'pl') renderPL();
+  if (view === 'stats') renderStats();
+  if (view === 'admin') renderAdmin();
+}
+
+function switchAdminTab(tabId) {
+  document.querySelectorAll('.admin-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.admin-subtab').forEach(t => t.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+// ===================================================================
+// DASHBOARD RENDERING
+// ===================================================================
+function renderDashboard() {
+  const sessions = appData.sessions;
+  renderProgressBanner(sessions);
+  renderKPICards(sessions);
+  renderSessionsGrid(sessions);
+  renderTimeline(sessions);
+}
+
+function renderProgressBanner(sessions) {
+  const start = new Date('2026-04-09');
+  const sessionDeadline = new Date('2026-09-15');
+  const contractEnd = new Date('2026-10-15');
+
+  const totalDays = daysDiff(start, sessionDeadline);
+  const elapsed = daysDiff(start, TODAY);
+  const timeFrac = clamp(elapsed / totalDays, 0, 1);
+
+  const doneSessions = sessions.filter(s => s.status === 'done').length;
+  const sessionFrac = doneSessions / 12;
+
+  const ratio = timeFrac > 0 ? Math.round((sessionFrac / timeFrac) * 100) : 0;
+
+  const daysToDeadline = daysDiff(TODAY, sessionDeadline);
+  const daysToContract = daysDiff(TODAY, contractEnd);
+
+  const banner = document.getElementById('progress-banner');
+  banner.className = 'progress-banner ' + (ratio >= 80 ? 'green' : ratio >= 60 ? 'yellow' : 'red');
+
+  document.getElementById('pb-ratio-text').textContent = ratio + '%';
+  document.getElementById('pb-label-text').textContent =
+    ratio >= 80 ? '✅ 執行進度正常' : ratio >= 60 ? '⚠️ 執行進度略落後' : '🔴 執行進度落後';
+  document.getElementById('pb-detail-text').textContent =
+    `場次進度 ${Math.round(sessionFrac*100)}% ÷ 時間進度 ${Math.round(timeFrac*100)}%`;
+
+  document.getElementById('pb-time-fill').style.width = Math.round(timeFrac*100) + '%';
+  document.getElementById('pb-session-fill').style.width = Math.round(sessionFrac*100) + '%';
+  document.getElementById('pb-time-pct').textContent = Math.round(timeFrac*100) + '%';
+  document.getElementById('pb-session-pct').textContent = Math.round(sessionFrac*100) + '%';
+
+  document.getElementById('pb-days-deadline').textContent = daysToDeadline + ' 天';
+  document.getElementById('pb-days-contract').textContent = daysToContract + ' 天';
+}
+
+function renderKPICards(sessions) {
+  const done = sessions.filter(s => s.status === 'done');
+  const totalAtt = done.reduce((a,s) => a + s.migrants + s.employers, 0);
+  const migAtt = done.reduce((a,s) => a + s.migrants, 0);
+
+  document.getElementById('kpi-done').textContent = done.length + '/12';
+  document.getElementById('kpi-done-bar').style.width = (done.length / 12 * 100) + '%';
+  document.getElementById('kpi-total-att').textContent = totalAtt;
+  document.getElementById('kpi-mig-att').textContent = migAtt;
+
+  // Next session
+  const upcoming = sessions
+    .filter(s => s.status !== 'done')
+    .sort((a,b) => a.date.localeCompare(b.date));
+  if (upcoming.length > 0) {
+    const nextDate = new Date(upcoming[0].date + 'T00:00:00');
+    const diff = daysDiff(TODAY, nextDate);
+    document.getElementById('kpi-next-days').textContent = diff >= 0 ? diff + '天' : '已過';
+    document.getElementById('kpi-next-label').textContent = fmtDateFull(upcoming[0].date) + ' ' + upcoming[0].topic;
+  } else {
+    document.getElementById('kpi-next-days').textContent = '--';
+    document.getElementById('kpi-next-label').textContent = '全部場次已完成';
+  }
+
+  // 本案總標價（固定）
+  document.getElementById('kpi-contract').textContent = '$1,250,000';
+
+  // 預估盈餘（簡化版：合約金額 - 已發生支出 - 人事預算 - 剩餘估值）
+  const CONTRACT = 1250000;
+  const expenses = appData.expenses;
+  const totalActual = expenses.reduce((a,e) => a + (e.actual||0), 0);
+  const estPersonnel = expenses.filter(e=>e.category==='人事費用').reduce((a,e)=>a+(e.budget||0),0);
+  const doneDates = [...new Set(done.map(s=>s.date))].length;
+  const totalDates = [...new Set(sessions.map(s=>s.date))].length;
+  const remainingDates = totalDates - doneDates;
+  const d_ = doneDates || 1;
+  const estMeals = Math.round((expenses.find(e=>e.id==='e10')||{actual:0}).actual / d_) * remainingDates;
+  const estTransport = Math.round((expenses.find(e=>e.id==='e18')||{actual:0}).actual / d_) * remainingDates;
+  const estVenueRem = 9600;
+  const estOther = (expenses.find(e=>e.id==='e6')||{budget:0}).budget +
+                   (expenses.find(e=>e.id==='e19')||{budget:0}).budget +
+                   (expenses.find(e=>e.id==='e8')||{budget:0}).budget +
+                   (expenses.find(e=>e.id==='e21')||{budget:0}).budget;
+  const estTotal = totalActual + estPersonnel + estVenueRem + estMeals + estTransport + estOther;
+  const estSurplus = CONTRACT - estTotal;
+  const surplusEl = document.getElementById('kpi-surplus');
+  surplusEl.textContent = (estSurplus >= 0 ? '+$' : '-$') + Math.abs(Math.round(estSurplus)).toLocaleString('zh-TW');
+  surplusEl.style.color = estSurplus >= 0 ? 'var(--success)' : 'var(--danger)';
+  document.getElementById('kpi-surplus-sub').textContent = `已付 $${totalActual.toLocaleString('zh-TW')}，估完工成本 $${Math.round(estTotal).toLocaleString('zh-TW')}`;
+
+  // 場次達標率
+  const pct = Math.round(done.length / 12 * 100);
+  document.getElementById('kpi-completion-rate').textContent = pct + '%';
+  document.getElementById('kpi-completion-bar').style.width = pct + '%';
+  document.getElementById('kpi-completion-sub').textContent = `已完成 ${done.length} 場 / 共 12 場`;
+}
+
+function renderSessionsGrid(sessions) {
+  // Group by date
+  const groups = {};
+  sessions.forEach(s => {
+    if (!groups[s.date]) groups[s.date] = [];
+    groups[s.date].push(s);
+  });
+
+  const grid = document.getElementById('sessions-grid');
+  grid.innerHTML = '';
+
+  Object.keys(groups).sort().forEach(date => {
+    const pair = groups[date];
+    const s0 = pair[0];
+    const groupDiv = document.createElement('div');
+    groupDiv.className = 'session-group';
+    groupDiv.innerHTML = `
+      <div class="session-group-header">
+        <div class="date">${fmtDateFull(date)}</div>
+        <div class="zone">【${s0.zone}】</div>
+        <div class="venue">${s0.venue} ／ ${s0.venueAddr}</div>
+      </div>
+      <div class="sessions-pair" id="pair-${date.replace(/-/g,'')}"></div>
+    `;
+    grid.appendChild(groupDiv);
+
+    const pairDiv = groupDiv.querySelector('.sessions-pair');
+    pair.forEach(s => {
+      const total = s.migrants + s.employers;
+      const meetsMin = s.status === 'done'
+        ? (total >= s.minTotal && s.migrants >= s.minMig) : null;
+
+      let statusBadge = '';
+      let cardClass = 'pending';
+      if (s.status === 'done') {
+        statusBadge = '<span class="sc-badge done">✅ 完成</span>';
+        cardClass = 'done';
+      } else if (s.status === 'upcoming') {
+        statusBadge = '<span class="sc-badge upcoming">🔜 即將</span>';
+        cardClass = 'upcoming';
+      } else {
+        statusBadge = '<span class="sc-badge pending">📋 待辦</span>';
+      }
+
+      let minText = '';
+      if (s.status === 'done') {
+        if (meetsMin) {
+          minText = `<div class="sc-min ok">✓ 達標（最低${s.minTotal}人，移工${s.minMig}人）</div>`;
+        } else {
+          minText = `<div class="sc-min fail">✗ 未達標（最低${s.minTotal}人，移工${s.minMig}人）</div>`;
+        }
+      } else {
+        minText = `<div class="sc-min na">最低要求：${s.minTotal}人（移工${s.minMig}人）</div>`;
+      }
+
+      const topicClass = {
+        '失智症日常生活安排與問題行為處理':'topic-dim',
+        '高齡飲食備餐技巧':'topic-diet',
+        '高齡咀嚼吞嚥障礙及口腔照護':'topic-chew',
+        '居家護理特殊問題指導及就醫安全':'topic-nurs',
+        '外國人從事家庭看護工作補充訓練－口腔內(懸壅垂之前)及人工氣道管內分泌物之清潔、抽吸與移除及氧氣使用':'topic-adv'
+      }[s.topic]||'';
+      pairDiv.innerHTML += `
+        <div class="session-card ${cardClass} ${topicClass}">
+          <div class="sc-header">
+            <div class="sc-num">場次 ${s.id}</div>
+            ${statusBadge}
+          </div>
+          <span class="sc-ampm ${s.ampm.toLowerCase()}">${s.ampm}</span>
+          <div class="sc-topic">${s.topic}</div>
+          <div class="sc-teacher">講師：${s.teacher}</div>
+          ${s.status === 'done' ? `
+          <div class="sc-attendance">
+            <div class="sc-att-item"><div class="val">${s.migrants}</div><div class="lbl">移工</div></div>
+            <div class="sc-att-item"><div class="val">${s.employers}</div><div class="lbl">雇主</div></div>
+            <div class="sc-att-item"><div class="val">${total}</div><div class="lbl">總計</div></div>
+          </div>` : `<div class="sc-attendance"><div style="color:var(--text-muted);font-size:12px">尚未舉辦</div></div>`}
+          ${minText}
+          ${s.note ? `<div style="font-size:11px;color:var(--text-muted);margin-top:4px">📝 ${s.note}</div>` : ''}
+        </div>
+      `;
+    });
+  });
+}
+
+function renderTimeline(sessions) {
+  const dates = [...new Set(sessions.map(s => s.date))].sort();
+  const start = new Date('2026-04-09');
+  const end = new Date('2026-09-15');
+  const totalSpan = daysDiff(start, end);
+
+  const tlItems = document.getElementById('tl-items');
+  tlItems.innerHTML = '';
+
+  const todayPct = clamp(daysDiff(start, TODAY) / totalSpan * 100, 0, 100);
+  document.getElementById('tl-progress').style.width = todayPct + '%';
+
+  dates.forEach(date => {
+    const d = new Date(date + 'T00:00:00');
+    const pairSessions = sessions.filter(s => s.date === date);
+    const allDone = pairSessions.every(s => s.status === 'done');
+    const isNext = !allDone && pairSessions.some(s => s.status === 'upcoming');
+
+    let dotClass = 'upcoming';
+    if (allDone) dotClass = 'done';
+    else if (isNext) dotClass = 'current';
+
+    const zone = pairSessions[0].zone;
+    tlItems.innerHTML += `
+      <div class="tl-item">
+        <div class="tl-dot ${dotClass}"></div>
+        <div class="tl-date">${fmtDateFull(date)}</div>
+        <div class="tl-zone">${zone}</div>
+        <div class="tl-sessions">${pairSessions.map(s => s.ampm + ' ' + s.topic.slice(0,4)).join(' / ')}</div>
+      </div>
+    `;
+  });
+}
+
+// ===================================================================
+// P&L RENDERING
+// ===================================================================
+function renderPL() {
+  const expenses = appData.expenses;
+  const sessions = appData.sessions;
+
+  const CONTRACT = 1250000;
+  const totalActual = expenses.reduce((a,e) => a + (e.actual||0), 0);
+
+  // Sessions progress
+  const doneSessions = sessions.filter(s => s.status === 'done').length;
+  const totalSessions = sessions.length;
+  const doneDates = [...new Set(sessions.filter(s=>s.status==='done').map(s=>s.date))].length;
+  const totalDates = [...new Set(sessions.map(s=>s.date))].length;
+  const remainingDates = totalDates - doneDates;
+
+  const budgetUsedPct = Math.round(totalActual / CONTRACT * 100);
+  const sessionsPct = Math.round(doneSessions / totalSessions * 100);
+  const currentPL = CONTRACT - totalActual;
+
+  const getActual = id => (expenses.find(e=>e.id===id)||{}).actual || 0;
+  const getBudget = id => (expenses.find(e=>e.id===id)||{}).budget || 0;
+
+  // Completion estimates
+  const actualMeals = getActual('e10');
+  const actualTransport = getActual('e18');
+  const actualLecture = getActual('e5');
+  const d = doneDates || 1;
+  const estPerDateMeals = Math.round(actualMeals / d);
+  const estPerDateTransport = Math.round(actualTransport / d);
+  const estPerDateLecture = Math.round(actualLecture / d);
+
+  const estPersonnel = expenses.filter(e=>e.category==='人事費用').reduce((a,e)=>a+(e.budget||0),0);
+  const estVenueRem = 9600; // 9/6+9/12 兩場日 × 估$4,800
+  const estMealsRemaining = estPerDateMeals * remainingDates;
+  const estTransportRemaining = estPerDateTransport * remainingDates;
+  const estLectureRemaining = estPerDateLecture * remainingDates;
+  const estTranslation = getBudget('e6');
+  const estShorts = getBudget('e19');
+  const estOther = getBudget('e8') + getBudget('e12') + getBudget('e14') + getBudget('e15');
+  const estMgmt = getBudget('e21');
+
+  const estCompletionTotal = totalActual + estPersonnel + estVenueRem + estMealsRemaining +
+    estTransportRemaining + estLectureRemaining + estTranslation + estShorts + estOther + estMgmt;
+  const estSurplus = CONTRACT - estCompletionTotal;
+
+  // Budget items (Column 1)
+  const budgetItems = [
+    { no:1,  label:'工作人員費',    note:'190元/節×4節×3人×12場', id:'e1' },
+    { no:2,  label:'講師鐘點費',    note:'2,000元/節×4節×12場',    id:'e2' },
+    { no:3,  label:'通譯人員鐘點費',note:'500元/節×2名×4節×12場',  id:'e3' },
+    { no:4,  label:'專業照顧人力',  note:'280元/節×4節×3人×12場',  id:'e4' },
+    { no:5,  label:'講義印製費',    note:'12場×4節',                id:'e5' },
+    { no:6,  label:'講義翻譯費',    note:'多語版翻譯',              id:'e6' },
+    { no:7,  label:'教材費',        note:'護理包、移位腰帶等',      id:'e7' },
+    { no:8,  label:'教具租用費',    note:'',                        id:'e8' },
+    { no:9,  label:'有獎徵答獎品',  note:'計入教材費',              id:'e9' },
+    { no:10, label:'餐費',          note:'工作人員、老師、學員',    id:'e10' },
+    { no:11, label:'場地費',        note:'12場×$9,000/場日',        id:'e11' },
+    { no:12, label:'場地佈置費',    note:'',                        id:'e12' },
+    { no:13, label:'郵電費',        note:'',                        id:'e13' },
+    { no:14, label:'撰稿費',        note:'',                        id:'e14' },
+    { no:15, label:'設計費',        note:'',                        id:'e15' },
+    { no:16, label:'印製費',        note:'宣傳、海報等',            id:'e16' },
+    { no:17, label:'保險費',        note:'公共意外責任險',          id:'e17' },
+    { no:18, label:'租車費',        note:'交通車接送',              id:'e18' },
+    { no:19, label:'Shorts短影音',  note:'中文4部+印尼語4部',       id:'e19' },
+    { no:20, label:'雜費',          note:'場佈交通、計程車等',      id:'e20' },
+    { no:21, label:'管理費',        note:'總經費10%（固定）',       id:'e21' },
+  ];
+
+  const actualItems = expenses.filter(e=>(e.actual||0)>0).sort((a,b)=>(b.actual||0)-(a.actual||0));
+  const pendingItems = expenses.filter(e=>(e.actual||0)===0 && (e.note||'').includes('⚠️'));
+
+  const col1 = `
+    <div class="pl-col">
+      <div class="pl-col-header">📋 政府預算（需求說明書 ${budgetItems.length} 項）</div>
+      ${budgetItems.map(it=>`
+        <div class="pl-line">
+          <div class="pl-lbl">項${it.no} ${it.label}${it.note?`<small>${it.note}</small>`:''}
+          </div>
+          <div class="pl-amt">$${fmt(getBudget(it.id))}</div>
+        </div>`).join('')}
+      <div class="pl-contract">
+        <span>合約總金額（含稅）</span>
+        <span>$${fmt(CONTRACT)}</span>
+      </div>
+    </div>`;
+
+  const col2 = `
+    <div class="pl-col">
+      <div class="pl-col-header">💸 實際支出（已發生）</div>
+      ${actualItems.map(e=>`
+        <div class="pl-line">
+          <div class="pl-lbl">${e.item}<small>${e.category}</small></div>
+          <div class="pl-amt">$${fmt(e.actual)}</div>
+        </div>`).join('')}
+      ${pendingItems.length>0?`
+        <div class="pl-section-label">⚠️ 待確認（暫列 $0）</div>
+        ${pendingItems.slice(0,5).map(e=>`
+          <div class="pl-line">
+            <div class="pl-lbl" style="color:var(--text-muted)">${e.item}</div>
+            <div class="pl-amt warn">待確認</div>
+          </div>`).join('')}
+        ${pendingItems.length>5?`<div style="font-size:11px;color:var(--text-muted);padding:4px 0">…等共 ${pendingItems.length} 項待確認</div>`:''}
+      `:''}
+      <div class="pl-subtotal">
+        <span>已發生支出合計</span>
+        <span>$${fmt(totalActual)}</span>
+      </div>
+      <div class="pl-progress-section">
+        <div class="pl-progress-meta">
+          <span>已用預算 ${budgetUsedPct}%</span>
+          <span>完成 ${doneSessions}/${totalSessions} 場（${sessionsPct}%）</span>
+        </div>
+        <div class="pl-progress-track">
+          <div class="pl-progress-fill" style="width:${Math.min(budgetUsedPct,100)}%"></div>
+        </div>
+      </div>
+      <div class="pl-pl-box">
+        <div class="pl-pl-label">目前損益（合約金額 - 已付）</div>
+        <div class="pl-pl-value" style="color:${currentPL>=0?'var(--success)':'var(--danger)'}">
+          ${currentPL>=0?'+':''}$${fmt(Math.abs(currentPL))}
+        </div>
+      </div>
+    </div>`;
+
+  const col3 = `
+    <div class="pl-col">
+      <div class="pl-col-header">🔮 完工成本預估（${totalSessions}場）</div>
+      <div class="pl-line">
+        <div class="pl-lbl">已發生支出</div>
+        <div class="pl-amt">$${fmt(totalActual)}</div>
+      </div>
+      <div class="pl-section-label">剩餘費用預估（${remainingDates}場日期×估值）</div>
+      <div class="pl-line">
+        <div class="pl-lbl">人事費用<small>勞報單待入帳（全場預算）</small></div>
+        <div class="pl-amt warn">$${fmt(estPersonnel)}</div>
+      </div>
+      <div class="pl-line">
+        <div class="pl-lbl">剩餘場地費<small>9/6+9/12 估$4,800/場日×2</small></div>
+        <div class="pl-amt">$${fmt(estVenueRem)}</div>
+      </div>
+      <div class="pl-line">
+        <div class="pl-lbl">剩餘餐費<small>${remainingDates}場日期×估$${fmt(estPerDateMeals)}</small></div>
+        <div class="pl-amt">$${fmt(estMealsRemaining)}</div>
+      </div>
+      <div class="pl-line">
+        <div class="pl-lbl">剩餘租車費<small>${remainingDates}場日期×估$${fmt(estPerDateTransport)}</small></div>
+        <div class="pl-amt">$${fmt(estTransportRemaining)}</div>
+      </div>
+      <div class="pl-line">
+        <div class="pl-lbl">剩餘講義費<small>${remainingDates}場日期×估$${fmt(estPerDateLecture)}</small></div>
+        <div class="pl-amt">$${fmt(estLectureRemaining)}</div>
+      </div>
+      <div class="pl-line">
+        <div class="pl-lbl">翻譯費<small>⚠️ 待確認，按預算估</small></div>
+        <div class="pl-amt warn">$${fmt(estTranslation)}</div>
+      </div>
+      <div class="pl-line">
+        <div class="pl-lbl">短影音製作費<small>⚠️ 9/15後製作</small></div>
+        <div class="pl-amt warn">$${fmt(estShorts)}</div>
+      </div>
+      <div class="pl-line">
+        <div class="pl-lbl">其他費用<small>教具租用+場佈+撰稿+設計</small></div>
+        <div class="pl-amt warn">$${fmt(estOther)}</div>
+      </div>
+      <div class="pl-line">
+        <div class="pl-lbl">管理費<small>結案後計算（總經費10%固定）</small></div>
+        <div class="pl-amt">$${fmt(estMgmt)}</div>
+      </div>
+      <div class="pl-est-total">
+        <span>預估完工總成本</span>
+        <span>$${fmt(estCompletionTotal)}</span>
+      </div>
+      <div class="pl-est-surplus" style="color:${estSurplus>=0?'var(--success)':'var(--danger)'}">
+        <span>預估盈餘</span>
+        <span>${estSurplus>=0?'+':''}$${fmt(Math.abs(estSurplus))}</span>
+      </div>
+      <div class="pl-analysis">
+        <div class="pl-analysis-title">📊 薪資費用差異</div>
+        <div class="pl-analysis-item">① 場地費節省：8月（萬華日照）為公司自有機構，$0，原預算$36,000（2場日×$18,000）</div>
+        <div class="pl-analysis-item">② 人事費用：<strong>$${fmt(estPersonnel)}</strong> 尚待勞報單入帳，為最大待確認項目</div>
+        <div class="pl-analysis-item">③ 翻譯費：預算 $${fmt(estTranslation)}，需確認實際是否低於預算</div>
+        <div class="pl-analysis-item">④ 短影音：$${fmt(estShorts)}，9/15全部課程完成後才啟動製作</div>
+      </div>
+    </div>`;
+
+  document.getElementById('pl-3col').innerHTML = col1 + col2 + col3;
+}
+
+// ===================================================================
+// STATS RENDERING
+// ===================================================================
+let statsCharts = {};
+
+function renderStats() {
+  const sessions = appData.sessions;
+  const done = sessions.filter(s => s.status === 'done');
+
+  const totalMig = done.reduce((a,s) => a + s.migrants, 0);
+  const totalEmp = done.reduce((a,s) => a + s.employers, 0);
+  const metMin = done.filter(s => {
+    const tot = s.migrants + s.employers;
+    return tot >= s.minTotal && s.migrants >= s.minMig;
+  }).length;
+  const metRate = done.length > 0 ? Math.round(metMin / done.length * 100) : 0;
+
+  document.getElementById('stats-summary-cards').innerHTML = `
+    <div class="stat-card">
+      <div class="label">總移工人次</div>
+      <div class="value">${totalMig}</div>
+      <div class="sub">已完成場次累計</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">總雇主人次</div>
+      <div class="value">${totalEmp}</div>
+      <div class="sub">已完成場次累計</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">達標場次</div>
+      <div class="value" style="color:var(--success)">${metMin}</div>
+      <div class="sub">共 ${done.length} 場已完成</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">達標率</div>
+      <div class="value" style="color:${metRate>=80?'var(--success)':metRate>=60?'var(--warning)':'var(--danger)'}">
+        ${metRate}%
+      </div>
+      <div class="sub">已完成場次中</div>
+    </div>
+  `;
+
+  // Stats table
+  const tbody = document.getElementById('stats-table-body');
+  tbody.innerHTML = '';
+  sessions.forEach(s => {
+    const total = s.migrants + s.employers;
+    const meetsMin = s.status === 'done' && total >= s.minTotal && s.migrants >= s.minMig;
+    const failMin = s.status === 'done' && !meetsMin;
+    tbody.innerHTML += `
+      <tr class="${failMin ? 'under-min' : s.status==='done' ? 'ok-min' : ''}">
+        <td class="font-bold text-muted">${s.id}</td>
+        <td>${fmtDateFull(s.date)}</td>
+        <td><span class="sc-ampm ${s.ampm.toLowerCase()}" style="display:inline-block">${s.ampm}</span></td>
+        <td>${s.topic}</td>
+        <td class="text-right">${s.status==='done' ? s.migrants : '--'}</td>
+        <td class="text-right">${s.status==='done' ? s.employers : '--'}</td>
+        <td class="text-right font-bold">${s.status==='done' ? total : '--'}</td>
+        <td class="text-center">${s.minTotal}人（移工${s.minMig}）</td>
+        <td class="text-center">
+          ${s.status==='done' ? (meetsMin ? '✅' : '❌') : '--'}
+        </td>
+        <td>
+          ${s.status==='done'
+            ? `<span class="badge badge-success">完成</span>`
+            : s.status==='upcoming'
+              ? `<span class="badge badge-primary">即將</span>`
+              : `<span class="badge badge-neutral">待辦</span>`}
+        </td>
+      </tr>
+    `;
+  });
+
+  renderStatsCharts(sessions);
+}
+
+function renderStatsCharts(sessions) {
+  const labels = sessions.map(s => `#${s.id} ${s.topic.slice(0,4)}`);
+  const migData = sessions.map(s => s.migrants);
+  const empData = sessions.map(s => s.employers);
+  const minLine = sessions.map(s => s.minTotal);
+
+  if (statsCharts.bar) statsCharts.bar.destroy();
+  const barCtx = document.getElementById('chart-attendance-bar').getContext('2d');
+  statsCharts.bar = new Chart(barCtx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: '移工', data: migData, backgroundColor: '#E8732A', borderRadius: 4 },
+        { label: '雇主', data: empData, backgroundColor: '#3B82F6', borderRadius: 4 },
+        {
+          label: '最低人數',
+          data: minLine,
+          type: 'line',
+          borderColor: '#EF4444',
+          borderDash: [4,4],
+          backgroundColor: 'transparent',
+          pointRadius: 3,
+          pointBackgroundColor: '#EF4444',
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'top' },
+        datalabels: { display: false }
+      },
+      scales: {
+        x: { stacked: true, grid: { display: false }, ticks: { font: { size: 10 } } },
+        y: { stacked: true, grid: { color: '#F1F5F9' }, beginAtZero: true }
+      }
+    },
+    plugins: [ChartDataLabels]
+  });
+
+  // Ratio donut
+  const done = sessions.filter(s => s.status === 'done');
+  const totalMig = done.reduce((a,s) => a + s.migrants, 0);
+  const totalEmp = done.reduce((a,s) => a + s.employers, 0);
+
+  if (statsCharts.donut) statsCharts.donut.destroy();
+  const donutCtx = document.getElementById('chart-ratio-donut').getContext('2d');
+  statsCharts.donut = new Chart(donutCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['移工', '雇主'],
+      datasets: [{
+        data: [totalMig || 1, totalEmp || 1],
+        backgroundColor: ['#E8732A', '#3B82F6'],
+        borderWidth: 2, borderColor: '#fff'
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'bottom' },
+        datalabels: {
+          formatter: (val, ctx) => {
+            const total = ctx.dataset.data.reduce((a,b) => a+b, 0);
+            return Math.round(val/total*100) + '%';
+          },
+          color: '#fff', font: { weight: 'bold', size: 13 }
+        }
+      }
+    },
+    plugins: [ChartDataLabels]
+  });
+}
+
+// ===================================================================
+// ADMIN RENDERING
+// ===================================================================
+function renderAdmin() {
+  renderSessionAdmin();
+  renderExpenseAdmin();
+}
+
+function renderSessionAdmin() {
+  const tbody = document.getElementById('session-admin-body');
+  tbody.innerHTML = '';
+  appData.sessions.forEach((s, idx) => {
+    tbody.innerHTML += `
+      <tr>
+        <td class="font-bold text-muted">${s.id}</td>
+        <td><input type="text" value="${s.date}" onchange="appData.sessions[${idx}].date=this.value" style="width:100px"></td>
+        <td>
+          <select onchange="appData.sessions[${idx}].zone=this.value" style="width:70px">
+            ${['北區','西區','南區'].map(z => `<option ${s.zone===z?'selected':''}>${z}</option>`).join('')}
+          </select>
+        </td>
+        <td><input type="text" value="${s.venue}" onchange="appData.sessions[${idx}].venue=this.value" style="width:160px"></td>
+        <td>
+          <select onchange="appData.sessions[${idx}].ampm=this.value" style="width:60px">
+            <option ${s.ampm==='AM'?'selected':''}>AM</option>
+            <option ${s.ampm==='PM'?'selected':''}>PM</option>
+          </select>
+        </td>
+        <td><input type="text" value="${s.teacher}" onchange="appData.sessions[${idx}].teacher=this.value" style="width:70px"></td>
+        <td><input type="text" value="${s.topic}" onchange="appData.sessions[${idx}].topic=this.value" style="width:90px"></td>
+        <td>
+          <select onchange="appData.sessions[${idx}].status=this.value" style="width:80px">
+            <option value="done" ${s.status==='done'?'selected':''}>完成</option>
+            <option value="upcoming" ${s.status==='upcoming'?'selected':''}>即將</option>
+            <option value="pending" ${s.status==='pending'?'selected':''}>待辦</option>
+            <option value="cancelled" ${s.status==='cancelled'?'selected':''}>取消</option>
+          </select>
+        </td>
+        <td><input type="number" value="${s.migrants}" min="0" onchange="appData.sessions[${idx}].migrants=parseInt(this.value)||0" style="width:70px"></td>
+        <td><input type="number" value="${s.employers}" min="0" onchange="appData.sessions[${idx}].employers=parseInt(this.value)||0" style="width:70px"></td>
+        <td><textarea onchange="appData.sessions[${idx}].note=this.value" style="width:120px;font-size:11px">${s.note||''}</textarea></td>
+      </tr>
+    `;
+  });
+}
+
+function saveSessionData() {
+  saveData(appData);
+  const notice = document.getElementById('session-save-notice');
+  notice.classList.add('show');
+  setTimeout(() => notice.classList.remove('show'), 2000);
+}
+
+function renderExpenseAdmin() {
+  const tbody = document.getElementById('expense-admin-body');
+  tbody.innerHTML = '';
+  appData.expenses.forEach((e, idx) => {
+    tbody.innerHTML += `
+      <tr id="erow-${idx}">
+        <td>
+          <select onchange="appData.expenses[${idx}].category=this.value;updateExpenseTotals()">
+            ${['人事費用','業務費用','行政項目'].map(c => `<option ${e.category===c?'selected':''}>${c}</option>`).join('')}
+          </select>
+        </td>
+        <td><input type="text" value="${e.item}" onchange="appData.expenses[${idx}].item=this.value" style="width:130px"></td>
+        <td><input type="number" value="${e.budget||0}" min="0" onchange="appData.expenses[${idx}].budget=parseInt(this.value)||0;updateExpenseTotals()" style="width:100px;text-align:right"></td>
+        <td><input type="number" value="${e.actual||0}" min="0" onchange="appData.expenses[${idx}].actual=parseInt(this.value)||0;updateExpenseTotals()" style="width:100px;text-align:right"></td>
+        <td><input type="text" value="${e.note||''}" onchange="appData.expenses[${idx}].note=this.value" style="width:150px"></td>
+        <td><button class="btn btn-danger" onclick="deleteExpenseRow(${idx})">刪除</button></td>
+      </tr>
+    `;
+  });
+  updateExpenseTotals();
+}
+
+function updateExpenseTotals() {
+  const totalB = appData.expenses.reduce((a,e) => a+(e.budget||0), 0);
+  const totalA = appData.expenses.reduce((a,e) => a+(e.actual||0), 0);
+  document.getElementById('expense-total-budget').textContent = '$' + fmt(totalB);
+  document.getElementById('expense-total-actual').textContent = '$' + fmt(totalA);
+}
+
+function addExpenseRow() {
+  const newId = 'e' + Date.now();
+  appData.expenses.push({ id: newId, category: '業務費用', item: '新項目', budget: 0, actual: 0, note: '' });
+  renderExpenseAdmin();
+}
+
+function deleteExpenseRow(idx) {
+  if (!confirm('確定要刪除此項目？')) return;
+  appData.expenses.splice(idx, 1);
+  renderExpenseAdmin();
+}
+
+function saveExpenseData() {
+  saveData(appData);
+  const notice = document.getElementById('expense-save-notice');
+  notice.classList.add('show');
+  setTimeout(() => notice.classList.remove('show'), 2000);
+}
+
+function exportJSON() {
+  const json = JSON.stringify(appData, null, 2);
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'T115010_data_' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ===================================================================
+// INIT
+// ===================================================================
+function init() {
+  // Update nav clock
+  const d = TODAY;
+  document.getElementById('nav-clock').textContent =
+    `最後更新：${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()}`;
+
+  // Render initial view
+  renderDashboard();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
