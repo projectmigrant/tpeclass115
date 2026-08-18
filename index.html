@@ -394,9 +394,12 @@ table { border-collapse: collapse; width: 100%; }
   .project-banner h1 { font-size: 15px; }
 
   /* Progress banner */
-  .progress-banner { padding: 12px 14px; gap: 12px; }
-  .pb-ratio { font-size: 28px; }
-  .pb-item  { min-width: 120px; }
+  .progress-banner { padding: 12px 14px; gap: 10px; flex-wrap: wrap; }
+  .pb-ratio { font-size: 26px; }
+  .pb-divider { display: none; }
+  .pb-progress-bar { width: 100%; order: 3; }
+  .pb-items-group { margin-left: 0; width: 100%; order: 4; justify-content: flex-start; gap: 24px; }
+  .pb-item  { min-width: 80px; }
   .pb-item-value { font-size: 15px; }
 
   /* KPI grid */
@@ -428,6 +431,21 @@ table { border-collapse: collapse; width: 100%; }
   /* P&L */
   .pl-3col { grid-template-columns: 1fr; }
   .pl-col  { padding: 14px; }
+
+  /* P&L hero on mobile */
+  .pl-hero { flex-direction: column; align-items: flex-start; padding: 16px; gap: 16px; }
+  .pl-hero-right { width: 100%; justify-content: center; }
+  .pl-hero-amount { font-size: 36px; }
+  .pl-donut-wrap { width: 130px; height: 130px; }
+  .pl-legend { display: none; }
+  .pl-kpi-row { grid-template-columns: repeat(2, 1fr); }
+
+  /* Stats table scroll */
+  .table-card { overflow-x: auto; }
+  table { min-width: 480px; }
+
+  /* Registration table */
+  .registration-table { overflow-x: auto; }
 }
 
 /* ===== PL 3-Column Layout ===== */
