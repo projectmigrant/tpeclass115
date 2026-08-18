@@ -114,7 +114,8 @@ table { border-collapse: collapse; width: 100%; }
 .pb-label { font-size: 15px; font-weight: 600; }
 .pb-detail { font-size: 12px; opacity: 0.85; margin-top: 2px; }
 .pb-divider { width: 1px; height: 50px; background: rgba(255,255,255,0.3); }
-.pb-item { flex: 1; min-width: 160px; }
+.pb-item { min-width: 100px; }
+.pb-items-group { display: flex; gap: 40px; margin-left: auto; }
 .pb-item-label { font-size: 11px; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.5px; }
 .pb-item-value { font-size: 18px; font-weight: 700; margin-top: 2px; }
 .pb-progress-bar { flex: 2; min-width: 200px; }
@@ -430,6 +431,31 @@ table { border-collapse: collapse; width: 100%; }
 }
 
 /* ===== PL 3-Column Layout ===== */
+/* ===== P&L Summary Hero ===== */
+.pl-summary { margin-bottom: 24px; }
+.pl-hero { background: #FFFFFF; border: 1px solid var(--border); border-radius: var(--radius); padding: 24px 28px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+.pl-hero-left { flex: 1; min-width: 200px; }
+.pl-hero-title { font-size: 13px; font-weight: 600; color: var(--text-muted); margin-bottom: 8px; }
+.pl-hero-amount { font-size: 54px; font-weight: 900; line-height: 1; margin-bottom: 6px; }
+.pl-hero-sub { font-size: 13px; color: var(--text-muted); }
+.pl-hero-right { display: flex; align-items: center; gap: 24px; }
+.pl-donut-wrap { position: relative; width: 180px; height: 180px; flex-shrink: 0; }
+.pl-donut-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); text-align: center; pointer-events: none; }
+.pl-donut-center-label { font-size: 10px; color: var(--text-muted); }
+.pl-donut-center-val { font-size: 14px; font-weight: 700; }
+.pl-legend { display: flex; flex-direction: column; gap: 8px; }
+.pl-legend-item { display: flex; align-items: center; gap: 8px; min-width: 175px; }
+.pl-legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.pl-legend-name { font-size: 12px; color: var(--text-muted); flex: 1; }
+.pl-legend-val { font-size: 12px; font-weight: 600; color: var(--text); }
+.pl-kpi-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 24px; }
+.pl-kpi-card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); padding: 16px 12px; text-align: center; }
+.pl-kpi-label { font-size: 12px; color: var(--text-muted); font-weight: 500; margin-bottom: 8px; }
+.pl-kpi-value { font-size: 20px; font-weight: 800; line-height: 1; }
+.pl-kpi-sub { font-size: 11px; color: var(--text-muted); margin-top: 6px; }
+@media (max-width: 900px) { .pl-kpi-row { grid-template-columns: repeat(3,1fr); } .pl-legend { display: none; } }
+@media (max-width: 640px) { .pl-kpi-row { grid-template-columns: repeat(2,1fr); } .pl-hero-amount { font-size: 36px; } }
+
 .pl-3col { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; align-items: start; }
 @media (max-width: 1000px) { .pl-3col { grid-template-columns: 1fr; } }
 .pl-col { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); padding: 20px; }
@@ -500,6 +526,7 @@ table { border-collapse: collapse; width: 100%; }
       </div>
     </div>
 
+
     <!-- Traffic Light Progress Banner -->
     <div id="progress-banner" class="progress-banner">
       <div>
@@ -521,13 +548,15 @@ table { border-collapse: collapse; width: 100%; }
         </div>
       </div>
       <div class="pb-divider"></div>
-      <div class="pb-item">
-        <div class="pb-item-label">距課程截止</div>
-        <div class="pb-item-value" id="pb-days-deadline">-- 天</div>
-      </div>
-      <div class="pb-item">
-        <div class="pb-item-label">合約剩餘</div>
-        <div class="pb-item-value" id="pb-days-contract">-- 天</div>
+      <div class="pb-items-group">
+        <div class="pb-item">
+          <div class="pb-item-label">距課程截止</div>
+          <div class="pb-item-value" id="pb-days-deadline">-- 天</div>
+        </div>
+        <div class="pb-item">
+          <div class="pb-item-label">合約剩餘</div>
+          <div class="pb-item-value" id="pb-days-contract">-- 天</div>
+        </div>
       </div>
     </div>
 
@@ -565,9 +594,9 @@ table { border-collapse: collapse; width: 100%; }
         <div class="kpi-sub" id="kpi-surplus-sub">依完工成本估算</div>
       </div>
       <div class="kpi-card">
-        <div class="kpi-label">場次達標率</div>
+        <div class="kpi-label">預估利潤率</div>
         <div class="kpi-value" id="kpi-completion-rate">--</div>
-        <div class="kpi-sub" id="kpi-completion-sub">已完成 / 共 12 場</div>
+        <div class="kpi-sub" id="kpi-completion-sub">預估盈餘 ÷ 合約</div>
         <div class="kpi-bar-track"><div class="kpi-bar-fill" id="kpi-completion-bar" style="width:0%"></div></div>
       </div>
     </div>
@@ -599,6 +628,7 @@ table { border-collapse: collapse; width: 100%; }
       <h2>損益分析</h2>
       <p>預算 vs 實際支出 vs 完工成本預估</p>
     </div>
+    <div id="pl-summary"></div>
     <div class="pl-3col" id="pl-3col"></div>
   </div>
 </div>
@@ -734,23 +764,23 @@ table { border-collapse: collapse; width: 100%; }
 // DATA MODEL
 // ===================================================================
 const STORAGE_KEY = 'tpe_central_data';
-const TODAY = new Date('2026-07-30');
+const TODAY = new Date('2026-08-18');
 
 const DEFAULT_SESSIONS = [
   // Group 1: 7/5 北區
   { id:1, date:'2026-07-05', zone:'北區', venue:'臺北市中山老人住宅暨服務中心', venueAddr:'中山區新生北路二段101巷2號', ampm:'AM', teacher:'林乃玉', topic:'失智症日常生活安排與問題行為處理', status:'done', migrants:17, employers:11, note:'', minMig:10, minTotal:20 },
-  { id:2, date:'2026-07-05', zone:'北區', venue:'臺北市中山老人住宅暨服務中心', venueAddr:'中山區新生北路二段101巷2號', ampm:'PM', teacher:'劉婷妮', topic:'高齡飲食備餐技巧', status:'done', migrants:17, employers:11, note:'', minMig:10, minTotal:20 },
+  { id:2, date:'2026-07-05', zone:'北區', venue:'臺北市中山老人住宅暨服務中心', venueAddr:'中山區新生北路二段101巷2號', ampm:'PM', teacher:'劉婷妮', topic:'高齡飲食備餐技巧', status:'done', migrants:16, employers:10, note:'', minMig:10, minTotal:20 },
   // Group 2: 7/26 北區
-  { id:3, date:'2026-07-26', zone:'北區', venue:'臺北市中山老人住宅暨服務中心', venueAddr:'中山區新生北路二段101巷2號', ampm:'AM', teacher:'王麗雅', topic:'高齡咀嚼吞嚥障礙及口腔照護', status:'done', migrants:15, employers:10, note:'', minMig:10, minTotal:20 },
-  { id:4, date:'2026-07-26', zone:'北區', venue:'臺北市中山老人住宅暨服務中心', venueAddr:'中山區新生北路二段101巷2號', ampm:'PM', teacher:'陳金莉', topic:'居家護理特殊問題指導及就醫安全', status:'done', migrants:15, employers:10, note:'', minMig:10, minTotal:20 },
+  { id:3, date:'2026-07-26', zone:'北區', venue:'臺北市中山老人住宅暨服務中心', venueAddr:'中山區新生北路二段101巷2號', ampm:'AM', teacher:'王麗雅', topic:'高齡咀嚼吞嚥障礙及口腔照護', status:'done', migrants:13, employers:9, note:'被看護人5人', minMig:10, minTotal:20 },
+  { id:4, date:'2026-07-26', zone:'北區', venue:'臺北市中山老人住宅暨服務中心', venueAddr:'中山區新生北路二段101巷2號', ampm:'PM', teacher:'陳金莉', topic:'居家護理特殊問題指導及就醫安全', status:'done', migrants:13, employers:9, note:'被看護人5人', minMig:10, minTotal:20 },
   // Group 3: 8/2 西區
-  { id:5, date:'2026-08-02', zone:'西區', venue:'萬華社區長照機構', venueAddr:'萬華區康定路43號2樓', ampm:'AM', teacher:'劉建良', topic:'失智症日常生活安排與問題行為處理', status:'upcoming', migrants:0, employers:0, note:'', minMig:10, minTotal:20 },
-  { id:6, date:'2026-08-02', zone:'西區', venue:'萬華社區長照機構', venueAddr:'萬華區康定路43號2樓', ampm:'PM', teacher:'劉婷妮', topic:'高齡飲食備餐技巧', status:'upcoming', migrants:0, employers:0, note:'', minMig:10, minTotal:20 },
+  { id:5, date:'2026-08-02', zone:'西區', venue:'萬華社區長照機構', venueAddr:'萬華區康定路43號2樓', ampm:'AM', teacher:'劉建良', topic:'失智症日常生活安排與問題行為處理', status:'done', migrants:16, employers:10, note:'被看護人7人', minMig:10, minTotal:20 },
+  { id:6, date:'2026-08-02', zone:'西區', venue:'萬華社區長照機構', venueAddr:'萬華區康定路43號2樓', ampm:'PM', teacher:'劉婷妮', topic:'高齡飲食備餐技巧', status:'done', migrants:17, employers:11, note:'被看護人6人', minMig:10, minTotal:20 },
   // Group 4: 8/16 西區
-  { id:7, date:'2026-08-16', zone:'西區', venue:'萬華社區長照機構', venueAddr:'萬華區康定路43號2樓', ampm:'AM', teacher:'陳金莉', topic:'居家護理特殊問題指導及就醫安全', status:'pending', migrants:0, employers:0, note:'', minMig:10, minTotal:20 },
-  { id:8, date:'2026-08-16', zone:'西區', venue:'萬華社區長照機構', venueAddr:'萬華區康定路43號2樓', ampm:'PM', teacher:'王麗雅', topic:'高齡咀嚼吞嚥障礙及口腔照護', status:'pending', migrants:0, employers:0, note:'', minMig:10, minTotal:20 },
+  { id:7, date:'2026-08-16', zone:'西區', venue:'萬華社區長照機構', venueAddr:'萬華區康定路43號2樓', ampm:'AM', teacher:'陳金莉', topic:'居家護理特殊問題指導及就醫安全', status:'done', migrants:16, employers:11, note:'被看護人8人', minMig:10, minTotal:20 },
+  { id:8, date:'2026-08-16', zone:'西區', venue:'萬華社區長照機構', venueAddr:'萬華區康定路43號2樓', ampm:'PM', teacher:'王麗雅', topic:'高齡咀嚼吞嚥障礙及口腔照護', status:'done', migrants:19, employers:12, note:'被看護人8人', minMig:10, minTotal:20 },
   // Group 5: 9/6 南區
-  { id:9, date:'2026-09-06', zone:'南區', venue:'紅心字會信義長照', venueAddr:'信義區虎林街74巷2號', ampm:'AM', teacher:'劉建良', topic:'失智症日常生活安排與問題行為處理', status:'pending', migrants:0, employers:0, note:'', minMig:10, minTotal:20 },
+  { id:9, date:'2026-09-06', zone:'南區', venue:'紅心字會信義長照', venueAddr:'信義區虎林街74巷2號', ampm:'AM', teacher:'劉建良', topic:'失智症日常生活安排與問題行為處理', status:'upcoming', migrants:0, employers:0, note:'', minMig:10, minTotal:20 },
   { id:10, date:'2026-09-06', zone:'南區', venue:'紅心字會信義長照', venueAddr:'信義區虎林街74巷2號', ampm:'PM', teacher:'劉婷妮', topic:'高齡飲食備餐技巧', status:'pending', migrants:0, employers:0, note:'', minMig:10, minTotal:20 },
   // Group 6: 9/12 南區
   { id:11, date:'2026-09-12', zone:'南區', venue:'紅心字會信義長照', venueAddr:'信義區虎林街74巷2號', ampm:'AM', teacher:'陳金莉', topic:'居家護理特殊問題指導及就醫安全', status:'pending', migrants:0, employers:0, note:'', minMig:10, minTotal:20 },
@@ -761,32 +791,37 @@ const DEFAULT_SESSIONS = [
 //   1. Google Drive「115集中訓練費用支出明細表」(2026/7/29)
 //   2. ❰臺北集中訓練❱零用金收支明細表 (2026/7/30)
 //   3. 《轉轉月結》收支明細表－集中訓練相關名目 (2026/7/30)
-// 已確認總支出：$148,361（含費用明細表$138,569 + 零用金/轉轉新增$9,792）
-// ⚠️ 待確認：翻譯費、9月場地費、人員費（勞報單）
+//   4. 3_人事費用(每月勞報單)→11507臺北集中人事費.xlsx + 11508臺北集中人事費.xlsx (2026/8/18)
+// 已確認非人事費支出（更新至8/16）：
+//   租車費 $37,100 + 餐費 $33,187 + 教材費 $82,290 + 印製費(講義+其他) $8,250
+//   + 翻譯費 $8,500 + 保險費 $6,636 + 郵電費 $2,114 + 場地費 $9,600 + 雜費 $5,160 = 共 $192,837
+// 已確認人事費（7/5~8/16共4場）：$120,200（講師$48,000+通譯$38,400+工作人員$5,000+照服員$28,800）
+// 已確認總計：$313,037
+// ⚠️ 待確認：9月場地費(估$32,000)、9月4場人事費（勞報單）、教具租用費、撰稿/設計費
 const DEFAULT_EXPENSES = [
-  // 人事費用（待確認：勞報單尚未入帳）
-  { id:'e1',  category:'人事費用', item:'工作人員費',     budget:27360,  actual:0,      note:'190元/節×4節×3人×12場 ⚠️待確認勞報單' },
-  { id:'e2',  category:'人事費用', item:'講師鐘點費',     budget:96000,  actual:0,      note:'2,000元/節×4節×12場 ⚠️待確認勞報單' },
-  { id:'e3',  category:'人事費用', item:'通譯人員鐘點費', budget:48000,  actual:0,      note:'500元/節×2名×4節×12場 ⚠️待確認勞報單' },
-  { id:'e4',  category:'人事費用', item:'專業照顧人力',   budget:40320,  actual:0,      note:'280元/節×4節×3人×12場 ⚠️待確認勞報單' },
+  // 人事費用（已確認：7/5、7/26、8/2、8/16共4場；9月4場待確認）
+  { id:'e1',  category:'人事費用', item:'工作人員費',     budget:27360,  actual:5000,   note:'7/5:葉涵玉$1,800；8/2:林采勳$1,600；8/16:朱夏欣$1,600（打卡制不計：沈芊佑、徐靖雯、陳怡霖、胡佑霓）⚠️9月4場待確認' },
+  { id:'e2',  category:'人事費用', item:'講師鐘點費',     budget:96000,  actual:48000,  note:'7/5:林乃玉+劉婷妮$12,000；7/26:王麗雅+陳金莉$12,000；8/2:劉建良+劉婷妮$12,000；8/16:王麗雅+陳金莉$12,000 ⚠️9月4場待確認' },
+  { id:'e3',  category:'人事費用', item:'通譯人員鐘點費', budget:48000,  actual:38400,  note:'7/5:孫佳年$4,800+胡佑霓獎金$4,800；7/26:孫佳年$4,800+黃湘雲$4,800；8/2:孫佳年$4,800+胡佑霓獎金$4,800；8/16:孫佳年$4,800+胡佑霓獎金$4,800 ⚠️9月4場待確認' },
+  { id:'e4',  category:'人事費用', item:'專業照顧人力',   budget:40320,  actual:28800,  note:'7/5:王詩涵+賴怡萱+張芷芸$7,200；7/26:王詩涵+賴怡萱+林意晨$7,200；8/2:王詩涵+賴怡萱+張芷芸$7,200；8/16:王詩涵+賴怡萱+張芷芸$7,200 ⚠️9月4場待確認' },
   // 業務費用
-  { id:'e5',  category:'業務費用', item:'講義印製費',     budget:84000,  actual:3641,   note:'lala印製$176(7/26$88+8/2$88) + 轉轉$3,465(7/1失智症+高齡備餐×30份$1,808；7/21居家護理+咀嚼吞嚥×30份$1,657)' },
-  { id:'e6',  category:'業務費用', item:'講義翻譯費',     budget:96750,  actual:0,      note:'⚠️待確認（翻譯費未見於轉轉月結，需另確認）' },
-  { id:'e7',  category:'業務費用', item:'教材費',         budget:120000, actual:69498,  note:'護理包+有獎徵答獎品+移位腰帶$66,983 + 7/5器具袋子$1,802 + 7/26紙碗湯匙+彩色筆$234 + 5/12贈品樣品$479（含護理包、移位腰帶80條×$1,000）' },
-  { id:'e8',  category:'業務費用', item:'教具租用費',     budget:60000,  actual:0,      note:'⚠️待確認' },
-  { id:'e9',  category:'業務費用', item:'有獎徵答獎品',   budget:15000,  actual:0,      note:'已計入教材費$66,983中' },
-  { id:'e10', category:'業務費用', item:'餐費',           budget:50400,  actual:27793,  note:'7/5: 飲料$755+稀飯$459+便當$4,225+食材$1,212+下午茶$2,841=$9,492；7/26: 稀飯$495+飲料$839+下午茶$2,100+午餐$14,867=$18,301' },
-  { id:'e11', category:'業務費用', item:'場地費',         budget:216000, actual:9600,   note:'7月(7/5&7/26)中山老人住宅$9,600；8月萬華社區長照$0（公司自有日照機構）；9月紅心字會⚠️待確認' },
-  { id:'e12', category:'業務費用', item:'場地佈置費',     budget:24000,  actual:0,      note:'⚠️待確認' },
+  { id:'e5',  category:'業務費用', item:'講義印製費',     budget:84000,  actual:3831,   note:'lala運送費$366(7/5$102+7/26$88+8/2$88+8/16$88) + 轉轉$3,465(7/1失智症+高齡備餐×30份$1,808；7/21居家護理+咀嚼吞嚥×30份$1,657)' },
+  { id:'e6',  category:'業務費用', item:'講義翻譯費',     budget:96750,  actual:8500,   note:'講義翻譯費$8,500（2026/6/8已付，整案確認）' },
+  { id:'e7',  category:'業務費用', item:'教材費',         budget:120000, actual:82290,  note:'第一次採購(護理包+獎品+移位腰帶)$66,983 + 第二次採購(護理包)$12,220 + 7/5器具袋子$1,802 + 7/26紙碗湯匙+彩色筆$234 + 8/2營養課用具$572 + 5/12贈品樣品$479' },
+  { id:'e8',  category:'業務費用', item:'教具租用費',     budget:60000,  actual:200,    note:'教具租用費$200（整案確認）' },
+  { id:'e9',  category:'業務費用', item:'有獎徵答獎品',   budget:15000,  actual:0,      note:'已計入教材費第一次採購$66,983中' },
+  { id:'e10', category:'業務費用', item:'餐費',           budget:50400,  actual:33187,  note:'7/5:飲料$755+稀飯$459+便當$4,225+食材$1,212+下午茶$2,841=$9,492；7/26:稀飯$495+飲料$839+下午茶$2,100+午餐$3,915=$7,349；8/2:午餐$4,300+稀飯$406+下午茶$2,222+飲料$802=$7,730；8/16:午餐$4,700+稀飯$840+飲料$846+下午茶$2,230=$8,616' },
+  { id:'e11', category:'業務費用', item:'場地費',         budget:216000, actual:9600,   note:'7月(7/5&7/26)中山老人住宅$9,600；8月萬華社區長照$0（公司自有日照機構）；9月紅心字會⚠️待確認（去年估$32,000）' },
+  { id:'e12', category:'業務費用', item:'場地佈置費',     budget:24000,  actual:0,      note:'內部工作人員協助佈置，確認成本 $0' },
   { id:'e13', category:'業務費用', item:'郵電費',         budget:10000,  actual:2114,   note:'郵寄費$1,560(7/5宣傳單$1,532+場地收據$28) + 捷運$25(7/26) + 快遞費$529(轉轉印刷品運送：5/29$211+6/1$128+7/2$102+7/21$88)' },
-  { id:'e14', category:'業務費用', item:'撰稿費',         budget:20000,  actual:0,      note:'⚠️待確認' },
-  { id:'e15', category:'業務費用', item:'設計費',         budget:8000,   actual:0,      note:'⚠️待確認' },
+  { id:'e14', category:'業務費用', item:'撰稿費',         budget:20000,  actual:0,      note:'執行窗口沈芊佑協助撰稿，確認成本 $0' },
+  { id:'e15', category:'業務費用', item:'設計費',         budget:8000,   actual:0,      note:'執行窗口沈芊佑協助設計，確認成本 $0' },
   { id:'e16', category:'業務費用', item:'印製費',         budget:12000,  actual:4419,   note:'轉轉月結集中訓練相關：4/21契約書$1,652 + 5/26宣傳海報$613 + 5/27傳單+海報$1,377 + 5/29海報$525 + 6/18愛滋+反詐騙海報$252' },
   { id:'e17', category:'業務費用', item:'保險費',         budget:10000,  actual:6636,   note:'公共意外責任險 $6,636（公司支付 2026/6/21）' },
-  { id:'e18', category:'業務費用', item:'租車費',         budget:96000,  actual:21300,  note:'7/5: 交通車去$5,000+回$5,500=$10,500；7/26: 交通車去$5,000+回$5,000+輪椅計程車$800=$10,800（月結）' },
-  { id:'e19', category:'業務費用', item:'Shorts短影音',   budget:80000,  actual:0,      note:'9/15前課程完成後製作（中文4部+印尼語4部）' },
+  { id:'e18', category:'業務費用', item:'租車費',         budget:96000,  actual:37100,  note:'7/5:去$5,000+回$5,500=$10,500；7/26:去$5,000+回$5,000=$10,000；8/2:去$3,900+回$3,900=$7,800；8/16:去$4,400+回$4,400=$8,800（均月結）' },
+  { id:'e19', category:'業務費用', item:'Shorts短影音',   budget:80000,  actual:0,      note:'執行窗口沈芊佑協助製作，確認成本 $0（9月課程結束後製作，中文4部+印尼語4部）' },
   // 行政項目
-  { id:'e20', category:'行政項目', item:'雜費',   budget:45000,  actual:3360,   note:'7/5場佈交通$905+場復$355=$1,260；7/26場佈交通$800+場復$400=$1,200；5/5場勘交通$100；7/21輪椅搬運計程車$800' },
+  { id:'e20', category:'行政項目', item:'雜費',   budget:45000,  actual:5160,   note:'7/5場佈$905+場復$355=$1,260；7/26場佈$800+場復$400=$1,200；7/21輪椅搬運$800；5/5場勘$100；8/2搬運計程車$600+場復$300=$900；8/16場佈計程車$600+場復$300=$900' },
   { id:'e21', category:'行政項目', item:'管理費', budget:91170,  actual:0,      note:'結案後計算' },
 ];
 
@@ -932,34 +967,37 @@ function renderKPICards(sessions) {
   // 本案總標價（固定）
   document.getElementById('kpi-contract').textContent = '$1,250,000';
 
-  // 預估盈餘（簡化版：合約金額 - 已發生支出 - 人事預算 - 剩餘估值）
+  // 預估盈餘（與損益頁同步公式）
   const CONTRACT = 1250000;
   const expenses = appData.expenses;
   const totalActual = expenses.reduce((a,e) => a + (e.actual||0), 0);
+  const _ga = id => (expenses.find(e=>e.id===id)||{}).actual || 0;
+  const _gb = id => (expenses.find(e=>e.id===id)||{}).budget || 0;
   const estPersonnel = expenses.filter(e=>e.category==='人事費用').reduce((a,e)=>a+(e.budget||0),0);
   const doneDates = [...new Set(done.map(s=>s.date))].length;
   const totalDates = [...new Set(sessions.map(s=>s.date))].length;
   const remainingDates = totalDates - doneDates;
   const d_ = doneDates || 1;
-  const estMeals = Math.round((expenses.find(e=>e.id==='e10')||{actual:0}).actual / d_) * remainingDates;
-  const estTransport = Math.round((expenses.find(e=>e.id==='e18')||{actual:0}).actual / d_) * remainingDates;
+  const estMeals = Math.round(_ga('e10') / d_) * remainingDates;
+  const estTransport = Math.round(_ga('e18') / d_) * remainingDates;
+  const estLectureRem = Math.round(_ga('e5') / d_) * remainingDates;
   const estVenueRem = 9600;
-  const estOther = (expenses.find(e=>e.id==='e6')||{budget:0}).budget +
-                   (expenses.find(e=>e.id==='e19')||{budget:0}).budget +
-                   (expenses.find(e=>e.id==='e8')||{budget:0}).budget +
-                   (expenses.find(e=>e.id==='e21')||{budget:0}).budget;
-  const estTotal = totalActual + estPersonnel + estVenueRem + estMeals + estTransport + estOther;
+  const estOther = _ga('e6') + _ga('e19') + _ga('e8') + _ga('e12') + _ga('e14') + _ga('e15');
+  const estMgmt = _gb('e21');
+  const estTotal = totalActual + estPersonnel + estVenueRem + estMeals + estTransport + estLectureRem + estOther + estMgmt;
   const estSurplus = CONTRACT - estTotal;
+  const profitRatePct = Math.round(estSurplus / CONTRACT * 100);
   const surplusEl = document.getElementById('kpi-surplus');
   surplusEl.textContent = (estSurplus >= 0 ? '+$' : '-$') + Math.abs(Math.round(estSurplus)).toLocaleString('zh-TW');
   surplusEl.style.color = estSurplus >= 0 ? 'var(--success)' : 'var(--danger)';
   document.getElementById('kpi-surplus-sub').textContent = `已付 $${totalActual.toLocaleString('zh-TW')}，估完工成本 $${Math.round(estTotal).toLocaleString('zh-TW')}`;
 
-  // 場次達標率
-  const pct = Math.round(done.length / 12 * 100);
-  document.getElementById('kpi-completion-rate').textContent = pct + '%';
-  document.getElementById('kpi-completion-bar').style.width = pct + '%';
-  document.getElementById('kpi-completion-sub').textContent = `已完成 ${done.length} 場 / 共 12 場`;
+  // 預估利潤率
+  const rateEl = document.getElementById('kpi-completion-rate');
+  rateEl.textContent = profitRatePct + '%';
+  rateEl.style.color = profitRatePct >= 0 ? 'var(--success)' : 'var(--danger)';
+  document.getElementById('kpi-completion-bar').style.width = Math.min(Math.max(profitRatePct, 0), 100) + '%';
+  document.getElementById('kpi-completion-sub').textContent = `預估盈餘 ÷ 合約金額`;
 }
 
 function renderSessionsGrid(sessions) {
@@ -1119,14 +1157,104 @@ function renderPL() {
   const estMealsRemaining = estPerDateMeals * remainingDates;
   const estTransportRemaining = estPerDateTransport * remainingDates;
   const estLectureRemaining = estPerDateLecture * remainingDates;
-  const estTranslation = getBudget('e6');
-  const estShorts = getBudget('e19');
-  const estOther = getBudget('e8') + getBudget('e12') + getBudget('e14') + getBudget('e15');
+  const estTranslation = getActual('e6'); // 講義翻譯費 $8,500 已確認
+  const estShorts = getActual('e19');    // 短影音 $0，由執行窗口沈芊佑協助
+  const estOther = getActual('e8') + getActual('e12') + getActual('e14') + getActual('e15'); // 均已確認：e8=$200, e12/e14/e15=$0
   const estMgmt = getBudget('e21');
 
   const estCompletionTotal = totalActual + estPersonnel + estVenueRem + estMealsRemaining +
     estTransportRemaining + estLectureRemaining + estTranslation + estShorts + estOther + estMgmt;
   const estSurplus = CONTRACT - estCompletionTotal;
+
+  // ===== Summary Hero =====
+  const profitRate = Math.round(estSurplus / CONTRACT * 100);
+  const donutSegs = [
+    { label:'人事費用', value: estPersonnel, color:'#E8732A' },
+    { label:'教材費', value: getActual('e7'), color:'#3B82F6' },
+    { label:'租車費', value: getActual('e18') + estTransportRemaining, color:'#06B6D4' },
+    { label:'餐費', value: getActual('e10') + estMealsRemaining, color:'#22C55E' },
+    { label:'其他費用', value: Math.max(0, estCompletionTotal - estPersonnel - getActual('e7') - (getActual('e18')+estTransportRemaining) - (getActual('e10')+estMealsRemaining)), color:'#94A3B8' },
+    { label:'預估盈餘', value: Math.max(0, estSurplus), color:'#8B5CF6' },
+  ].filter(s => s.value > 0);
+
+  document.getElementById('pl-summary').innerHTML = `
+    <div class="pl-hero">
+      <div class="pl-hero-left">
+        <div class="pl-hero-title">專案損益預估</div>
+        <div class="pl-hero-amount" style="color:${estSurplus>=0?'#22C55E':'#EF4444'}">${estSurplus>=0?'+':'-'}$${fmt(Math.abs(Math.round(estSurplus)))}</div>
+        <div class="pl-hero-sub">已完成 ${doneSessions}/${totalSessions} 場（${sessionsPct}%），以估完工成本計算</div>
+      </div>
+      <div class="pl-hero-right">
+        <div class="pl-donut-wrap">
+          <canvas id="pl-donut" width="180" height="180"></canvas>
+          <div class="pl-donut-center">
+            <div class="pl-donut-center-label">目前損益</div>
+            <div class="pl-donut-center-val" style="color:${currentPL>=0?'#22C55E':'#EF4444'}">${currentPL>=0?'+':'-'}$${fmt(Math.abs(currentPL))}</div>
+          </div>
+        </div>
+        <div class="pl-legend">
+          ${donutSegs.map(s=>`
+            <div class="pl-legend-item">
+              <div class="pl-legend-dot" style="background:${s.color}"></div>
+              <div class="pl-legend-name">${s.label}</div>
+              <div class="pl-legend-val">$${fmt(Math.round(s.value))}</div>
+            </div>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="pl-kpi-row">
+      <div class="pl-kpi-card">
+        <div class="pl-kpi-label">本案總標價</div>
+        <div class="pl-kpi-value" style="color:#2563EB">$${fmt(CONTRACT)}</div>
+        <div class="pl-kpi-sub">含稅（新台幣）</div>
+      </div>
+      <div class="pl-kpi-card">
+        <div class="pl-kpi-label">已確認支出</div>
+        <div class="pl-kpi-value">$${fmt(totalActual)}</div>
+        <div class="pl-kpi-sub">已用預算 ${budgetUsedPct}%</div>
+      </div>
+      <div class="pl-kpi-card">
+        <div class="pl-kpi-label">目前損益</div>
+        <div class="pl-kpi-value" style="color:${currentPL>=0?'var(--success)':'var(--danger)'}">${currentPL>=0?'+':'-'}$${fmt(Math.abs(currentPL))}</div>
+        <div class="pl-kpi-sub">合約金額 − 已付</div>
+      </div>
+      <div class="pl-kpi-card">
+        <div class="pl-kpi-label">預估完工成本</div>
+        <div class="pl-kpi-value" style="color:var(--warning)">$${fmt(Math.round(estCompletionTotal))}</div>
+        <div class="pl-kpi-sub">${doneSessions}/${totalSessions} 場完成</div>
+      </div>
+      <div class="pl-kpi-card">
+        <div class="pl-kpi-label">預估盈餘</div>
+        <div class="pl-kpi-value" style="color:${estSurplus>=0?'var(--success)':'var(--danger)'}">${estSurplus>=0?'+':'-'}$${fmt(Math.abs(Math.round(estSurplus)))}</div>
+        <div class="pl-kpi-sub">按完工成本估算</div>
+      </div>
+      <div class="pl-kpi-card">
+        <div class="pl-kpi-label">預估利潤率</div>
+        <div class="pl-kpi-value" style="color:${profitRate>=0?'var(--success)':'var(--danger)'}">${profitRate}%</div>
+        <div class="pl-kpi-sub">預估盈餘 ÷ 合約</div>
+      </div>
+    </div>`;
+
+  // 甜甜圈圖
+  setTimeout(() => {
+    const canvas = document.getElementById('pl-donut');
+    if (!canvas) return;
+    if (window._plDonutChart) { try { window._plDonutChart.destroy(); } catch(e){} }
+    window._plDonutChart = new Chart(canvas.getContext('2d'), {
+      type: 'doughnut',
+      data: {
+        labels: donutSegs.map(s=>s.label),
+        datasets: [{ data: donutSegs.map(s=>Math.round(s.value)), backgroundColor: donutSegs.map(s=>s.color), borderWidth: 2, borderColor:'#FFFFFF', hoverOffset:6 }]
+      },
+      options: {
+        responsive: false, cutout:'65%',
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: c => ` ${c.label}: $${Math.round(c.raw).toLocaleString('zh-TW')}` } }
+        }
+      }
+    });
+  }, 50);
 
   // Budget items (Column 1)
   const budgetItems = [
@@ -1238,16 +1366,28 @@ function renderPL() {
         <div class="pl-amt">$${fmt(estLectureRemaining)}</div>
       </div>
       <div class="pl-line">
-        <div class="pl-lbl">翻譯費<small>⚠️ 待確認，按預算估</small></div>
-        <div class="pl-amt warn">$${fmt(estTranslation)}</div>
+        <div class="pl-lbl">翻譯費<small>講義翻譯費，已確認</small></div>
+        <div class="pl-amt">$${fmt(estTranslation)}</div>
       </div>
       <div class="pl-line">
-        <div class="pl-lbl">短影音製作費<small>⚠️ 9/15後製作</small></div>
-        <div class="pl-amt warn">$${fmt(estShorts)}</div>
+        <div class="pl-lbl">短影音製作費<small>由執行窗口沈芊佑協助</small></div>
+        <div class="pl-amt">$0</div>
       </div>
       <div class="pl-line">
-        <div class="pl-lbl">其他費用<small>教具租用+場佈+撰稿+設計</small></div>
-        <div class="pl-amt warn">$${fmt(estOther)}</div>
+        <div class="pl-lbl">教具租借費</div>
+        <div class="pl-amt">$${fmt(getActual('e8'))}</div>
+      </div>
+      <div class="pl-line">
+        <div class="pl-lbl">場地佈置費<small>由執行窗口沈芊佑協助</small></div>
+        <div class="pl-amt">$0</div>
+      </div>
+      <div class="pl-line">
+        <div class="pl-lbl">撰稿費<small>由執行窗口沈芊佑協助</small></div>
+        <div class="pl-amt">$0</div>
+      </div>
+      <div class="pl-line">
+        <div class="pl-lbl">設計費<small>由執行窗口沈芊佑協助</small></div>
+        <div class="pl-amt">$0</div>
       </div>
       <div class="pl-line">
         <div class="pl-lbl">管理費<small>結案後計算（總經費10%固定）</small></div>
@@ -1265,8 +1405,8 @@ function renderPL() {
         <div class="pl-analysis-title">📊 薪資費用差異</div>
         <div class="pl-analysis-item">① 場地費節省：8月（萬華日照）為公司自有機構，$0，原預算$36,000（2場日×$18,000）</div>
         <div class="pl-analysis-item">② 人事費用：<strong>$${fmt(estPersonnel)}</strong> 尚待勞報單入帳，為最大待確認項目</div>
-        <div class="pl-analysis-item">③ 翻譯費：預算 $${fmt(estTranslation)}，需確認實際是否低於預算</div>
-        <div class="pl-analysis-item">④ 短影音：$${fmt(estShorts)}，9/15全部課程完成後才啟動製作</div>
+        <div class="pl-analysis-item">③ 翻譯費：講義翻譯費 $${fmt(estTranslation)}，已確認（2026/6/8已付）</div>
+        <div class="pl-analysis-item">④ 短影音：$0，由執行窗口沈芊佑協助製作，9月課程結束後啟動</div>
       </div>
     </div>`;
 
